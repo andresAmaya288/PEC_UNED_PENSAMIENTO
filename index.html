@@ -483,23 +483,32 @@ function slotsToChar(ids, type) {
 
 function validateEq(eq) {
   if (!eq || eq.includes('?')) return false;
-  const ei = eq.indexOf('='); if (ei < 0) return false;
-  const lhs = parseRoman(eq.slice(0, ei));
-  const rhs = eq.slice(ei + 1);
-  if (lhs === null || lhs <= 0) return false;
-  let r;
-  if (rhs.includes('+')) {
-    const p = rhs.split('+'); if (p.length !== 2) return false;
-    const a = parseRoman(p[0]), b = parseRoman(p[1]);
-    if (a === null || b === null) return false;
-    r = a + b;
-  } else if (rhs.includes('-')) {
-    const p = rhs.split('-'); if (p.length !== 2) return false;
-    const a = parseRoman(p[0]), b = parseRoman(p[1]);
-    if (a === null || b === null) return false;
-    r = a - b;
-  } else r = parseRoman(rhs);
-  return r !== null && r > 0 && lhs === r;
+  const sides = eq.split('=');
+  if (sides.length < 2) return false;
+
+  const values = sides.map(evalRomanExpr);
+  if (values.some(v => v === null || v <= 0)) return false;
+  return values.every(v => v === values[0]);
+}
+
+function evalRomanExpr(expr) {
+  const clean = expr.trim();
+  if (!clean) return null;
+  if (!/^[IVXLCDM+\-\s]+$/i.test(clean)) return null;
+
+  const parts = clean.split(/([+\-])/).map(p => p.trim()).filter(Boolean);
+  if (parts.length === 0 || parts.length % 2 === 0) return null;
+
+  let total = parseRoman(parts[0]);
+  if (total <= 0) return null;
+
+  for (let i = 1; i < parts.length; i += 2) {
+    const op = parts[i];
+    const term = parseRoman(parts[i + 1]);
+    if (term <= 0) return null;
+    total = op === '+' ? total + term : total - term;
+  }
+  return total;
 }
 
 function parseRoman(s) {
