@@ -545,6 +545,7 @@ function loadProblem(idx){
   const p=S.problems[idx];
   eqState=buildEquationState(p.eq);
   selectedUid=-1;
+  movesDone=0;
   S.movesDone=0;S.elapsed=0;
 
   document.getElementById('lp-blk').textContent=`Bloque ${p.block} · ${p.orderInBlock}/4`;
@@ -582,7 +583,9 @@ function resetSticks(){
   if(S.movesDone>0&&!confirm('¿Reiniciar las cerillas? Se perderá el movimiento realizado.'))return;
   const p=S.problems[S.idx];
   eqState=buildEquationState(p.eq);
-  selectedUid=-1;S.movesDone=0;
+  selectedUid=-1;
+  movesDone=0;
+  S.movesDone=0;
   document.getElementById('move-n').textContent='0';
   setStatus('Cerillas reiniciadas. Haz clic en una cerilla.','');
   render();
