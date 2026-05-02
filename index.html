@@ -121,8 +121,8 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
       <div class="status-msg" id="status">Haz clic en una cerilla para seleccionarla.</div>
       <div class="move-ctr">Movimientos: <em id="move-n">0</em> / 1 permitido</div>
       <div class="action-row">
-        <button class="btn-exp green" onclick="markSolved()">✓ Resuelto (YA)</button>
-        <button class="btn-exp red"   onclick="markFailed()">✗ Sin solución</button>
+        <button class="btn-exp green" onclick="checkSolution()">✓ Comprobar</button>
+        <button class="btn-exp red"   onclick="abandonProblem()">✗ Abandonar</button>
         <button class="btn-exp"       onclick="resetSticks()">↺ Reiniciar cerillas</button>
       </div>
     </div>
@@ -143,9 +143,8 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 </div>
 
 <!-- MODALS -->
-<div class="modal-back" id="m-solved"><div class="modal-box"><h3>¡Correcto!</h3><p id="m-stxt">Resultado registrado.</p><button class="btn-exp green" onclick="confirmSolved()">Continuar →</button></div></div>
-<div class="modal-back" id="m-timeout"><div class="modal-box danger"><h3>Tiempo agotado</h3><p>5 minutos superados. Se marca como no resuelto.</p><button class="btn-exp red" onclick="confirmFailed()">Continuar →</button></div></div>
-<div class="modal-back" id="m-fail"><div class="modal-box danger"><h3>Sin solución</h3><p>¿Marcar como no resuelto y continuar?</p><div class="modal-btns"><button class="btn-exp red" onclick="confirmFailed()">Sí</button><button class="btn-exp" onclick="closeModals()">Cancelar</button></div></div></div>
+<div class="modal-back" id="m-validate"><div class="modal-box"><h3 id="m-vtitle">Comprobación</h3><p id="m-vtxt">Resultado registrado.</p><button class="btn-exp green" onclick="confirmValidation()">Continuar →</button></div></div>
+<div class="modal-back" id="m-timeout"><div class="modal-box danger"><h3>Tiempo agotado</h3><p>5 minutos superados. Se marca como no resuelto.</p><button class="btn-exp red" onclick="openObsModal(false)">Continuar →</button></div></div>
 <div class="modal-back" id="m-obs">
   <div class="modal-box" style="max-width:520px;width:min(92vw,520px);text-align:left">
     <h3 id="m-obs-title">Observaciones</h3>
@@ -228,6 +227,7 @@ let slots = [];
 let selUid = -1;
 let movesDone = 0;
 let pendingSolve = null;
+let pendingValidation = null;
 
 function loadEquation(eqStr) {
   TOKENS = eqStr.split('');
@@ -591,18 +591,34 @@ function resetSticks(){
   render();
 }
 
-function markSolved(){
+function checkSolution(){
+  const eq = readEq();
+  if (!eq || eq.includes('?')) {
+    setStatus('Todavía hay cerillas colocadas de forma inválida.', 'err');
+    return;
+  }
+  const valid = validateEq(eq);
+  pendingValidation = valid;
   clearInterval(S.timerHandle);
-  document.getElementById('m-stxt').textContent=`Tiempo: ${S.elapsed}s. Pulsa continuar para el siguiente problema.`;
-  showModal('m-solved');
+  document.getElementById('m-vtitle').textContent = valid ? '¡Correcto!' : 'Incorrecto';
+  document.getElementById('m-vtxt').textContent = valid
+    ? `La ecuación "${eq}" es correcta. Pulsa continuar para anotar observaciones.`
+    : `La ecuación "${eq}" no es correcta. Pulsa continuar para anotar observaciones.`;
+  showModal('m-validate');
 }
-function markFailed(){showModal('m-fail');}
-function confirmSolved(){openObsModal(true);}
-function confirmFailed(){openObsModal(false);}
+
+function abandonProblem(){
+  openObsModal(false);
+}
+
+function confirmValidation(){
+  openObsModal(!!pendingValidation);
+}
 
 function openObsModal(solved){
   pendingSolve = solved;
   closeModals();
+  clearInterval(S.timerHandle);
   const title = document.getElementById('m-obs-title');
   const desc = document.getElementById('m-obs-desc');
   const txt = document.getElementById('m-obs-txt');
@@ -622,9 +638,9 @@ function confirmObservations(){
   const obs = document.getElementById('m-obs-txt').value.trim();
   document.getElementById('obs').value = obs;
   closeModals();
-  clearInterval(S.timerHandle);
   saveResult(!!pendingSolve, obs);
   pendingSolve = null;
+  pendingValidation = null;
   nextProblem();
 }
 
