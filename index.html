@@ -86,11 +86,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
     </div>
     <div style="margin-bottom:8px">
       <div class="flabel">Bloque(s)</div>
-      <div class="block-btn-row">
-        <button class="blk-btn sel" id="bb1" onclick="setBlock(1)">Bloque 1</button>
-        <button class="blk-btn"    id="bb2" onclick="setBlock(2)">Bloque 2</button>
-        <button class="blk-btn"    id="bb0" onclick="setBlock(0)">Ambos</button>
-      </div>
+      <div style="font-size:.78rem;color:var(--muted);line-height:1.5">Bloques incluidos: 1 y 2</div>
     </div>
     <button class="btn-start" onclick="startExp()">▶ Iniciar experimento</button>
     <div style="margin-top:18px;font-size:.7rem;color:var(--muted);line-height:1.7">
@@ -472,7 +468,7 @@ const PROBLEMS = [
 ];
 
 let S = {
-  participant:'', blockSel:1,
+  participant:'',
   problems:[], idx:0, results:[],
   movesDone:0, elapsed:0, maxTime:300, timerHandle:null
 };
@@ -480,17 +476,11 @@ let S = {
 /* ════════════════════════════════════════════════════════
    WELCOME
 ════════════════════════════════════════════════════════ */
-function setBlock(n){
-  S.blockSel=n;
-  ['bb1','bb2','bb0'].forEach(id=>document.getElementById(id).classList.remove('sel'));
-  document.getElementById(n===1?'bb1':n===2?'bb2':'bb0').classList.add('sel');
-}
-
 function startExp(){
   const code=document.getElementById('inp-p').value.trim();
   if(!code){alert('Introduce el código del participante.');return;}
   S.participant=code;
-  let pool=PROBLEMS.filter(p=>S.blockSel===0||p.block===S.blockSel);
+  let pool=PROBLEMS;
   const byBlock={};
   pool.forEach(p=>{(byBlock[p.block]=byBlock[p.block]||[]).push({...p});});
   S.problems=[];
@@ -617,7 +607,7 @@ function downloadCSV(){
   a.click();
 }
 
-function newSession(){clearInterval(S.timerHandle);document.getElementById('inp-p').value='';setBlock(1);showScreen('screen-welcome');}
+function newSession(){clearInterval(S.timerHandle);document.getElementById('inp-p').value='';showScreen('screen-welcome');}
 
 /* ════════════════════════════════════════════════════════
    UI HELPERS
