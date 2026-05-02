@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Experimento Knoblich et al. (1999)</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;600;700&family=Barlow+Condensed:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;--accent:#e8a020;--accent2:#58a6ff;--danger:#f85149;--success:#3fb950;--text:#e6edf3;--muted:#8b949e;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;}
+.screen{display:none;}.screen.active{display:flex;flex-direction:column;min-height:100vh;}
+.lab-header{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.lab-logo{font-family:'Barlow Condensed',sans-serif;font-size:1rem;letter-spacing:.12em;color:var(--accent);text-transform:uppercase;}
+.lab-sub{font-size:.65rem;color:var(--muted);letter-spacing:.08em;}
+#screen-welcome{align-items:center;justify-content:center;background:radial-gradient(ellipse at 40% 30%,#1e2a1a,var(--bg) 70%);}
+.welcome-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:44px 52px;max-width:460px;width:100%;box-shadow:0 0 60px rgba(0,0,0,.6);}
+.welcome-card h1{font-family:'Barlow Condensed',sans-serif;font-size:2rem;letter-spacing:.06em;color:var(--accent);text-transform:uppercase;margin-bottom:4px;}
+.ref-tag{font-size:.72rem;color:var(--muted);font-family:'Share Tech Mono',monospace;margin-bottom:28px;}
+.flabel{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.finput{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:10px 14px;font-family:'Share Tech Mono',monospace;font-size:1.1rem;width:100%;outline:none;transition:border-color .2s;}
+.finput:focus{border-color:var(--accent);}
+.btn-start{background:var(--accent);color:#000;border:none;border-radius:6px;padding:12px;font-family:'Barlow Condensed',sans-serif;font-size:1rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;width:100%;margin-top:20px;transition:opacity .2s;}
+.btn-start:hover{opacity:.85;}
+.block-btn-row{display:flex;gap:8px;margin-top:8px;}
+.blk-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px 0;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;flex:1;transition:border-color .2s,color .2s;}
+.blk-btn.sel{border-color:var(--accent);color:var(--accent);}
+.exp-layout{display:grid;grid-template-columns:250px 1fr;flex:1;overflow:hidden;}
+.left-panel{background:var(--surface);border-right:1px solid var(--border);padding:18px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;}
+.info-block{border-bottom:1px solid var(--border);padding-bottom:12px;}
+.info-label{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
+.info-value{font-family:'Share Tech Mono',monospace;font-size:1rem;color:var(--text);}
+.info-value.accent{color:var(--accent);font-size:1.25rem;}
+.timer-big{font-family:'Share Tech Mono',monospace;font-size:2.4rem;color:var(--accent2);text-align:center;padding:8px 0;}
+.timer-big.warn{color:var(--danger);animation:blink 1s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.tbar-wrap{background:var(--surface2);border-radius:4px;height:5px;overflow:hidden;}
+.tbar{height:100%;background:var(--accent2);transition:width 1s linear,background .4s;border-radius:4px;}
+.tbar.warn{background:var(--danger);}
+.dots-row{display:flex;gap:5px;flex-wrap:wrap;}
+.dot{width:26px;height:26px;border-radius:4px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.58rem;font-family:'Share Tech Mono',monospace;color:var(--muted);}
+.dot.cur{border-color:var(--accent);color:var(--accent);}.dot.ok{background:var(--success);border-color:var(--success);color:#000;}.dot.fail{background:var(--danger);border-color:var(--danger);color:#fff;}
+.obs-field{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px 10px;font-family:'Barlow',sans-serif;font-size:.8rem;resize:vertical;min-height:80px;width:100%;outline:none;}
+.main-area{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 32px;gap:20px;}
+.prob-tag{font-family:'Share Tech Mono',monospace;font-size:.68rem;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;text-align:center;}
+.prob-title{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;color:var(--text);text-align:center;margin-top:4px;}
+.eq-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px 40px;display:flex;align-items:center;justify-content:center;min-height:170px;}
+.status-msg{min-height:22px;font-family:'Share Tech Mono',monospace;font-size:.82rem;text-align:center;color:var(--muted);max-width:600px;}
+.status-msg.ok{color:var(--success);}.status-msg.err{color:var(--danger);}.status-msg.info{color:var(--accent2);}
+.move-ctr{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--muted);text-align:center;}
+.move-ctr em{color:var(--accent);font-style:normal;}
+.action-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+.btn-exp{border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:6px;padding:9px 20px;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:background .2s;}
+.btn-exp:hover{background:var(--surface);}
+.btn-exp.green{background:var(--success);color:#000;border-color:var(--success);}
+.btn-exp.red{background:var(--danger);color:#fff;border-color:var(--danger);}
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:999;display:none;align-items:center;justify-content:center;}
+.modal-back.show{display:flex;}
+.modal-box{background:var(--surface);border:1px solid var(--accent);border-radius:10px;padding:36px 44px;text-align:center;max-width:380px;}
+.modal-box h3{font-family:'Barlow Condensed',sans-serif;font-size:1.7rem;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;}
+.modal-box.danger h3{color:var(--danger);}
+.modal-box p{color:var(--muted);font-size:.88rem;margin-bottom:20px;}
+.modal-btns{display:flex;gap:10px;justify-content:center;}
+#screen-results{align-items:center;justify-content:center;background:var(--bg);padding:40px 20px;}
+.res-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:32px 40px;max-width:820px;width:100%;}
+.res-card h2{font-family:'Barlow Condensed',sans-serif;font-size:1.5rem;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;}
+.res-table{width:100%;border-collapse:collapse;margin:18px 0;font-size:.8rem;}
+.res-table th{background:var(--surface2);color:var(--muted);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);}
+.res-table td{padding:7px 10px;border-bottom:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:.78rem;}
+.res-table tr:last-child td{border-bottom:none;}
+.cell-ok{color:var(--success);}.cell-fail{color:var(--danger);}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- WELCOME -->
+<div id="screen-welcome" class="screen active">
+  <div class="welcome-card">
+    <h1>Cerillas &amp; Insight</h1>
+    <div class="ref-tag">Réplica de Knoblich et al. (1999)</div>
+    <div style="margin-bottom:18px">
+      <div class="flabel">Código del participante</div>
+      <input id="inp-p" class="finput" type="text" placeholder="Ej. P01" maxlength="10" autocomplete="off">
+    </div>
+    <div style="margin-bottom:8px">
+      <div class="flabel">Bloque(s)</div>
+      <div class="block-btn-row">
+        <button class="blk-btn sel" id="bb1" onclick="setBlock(1)">Bloque 1</button>
+        <button class="blk-btn"    id="bb2" onclick="setBlock(2)">Bloque 2</button>
+        <button class="blk-btn"    id="bb0" onclick="setBlock(0)">Ambos</button>
+      </div>
+    </div>
+    <button class="btn-start" onclick="startExp()">▶ Iniciar experimento</button>
+    <div style="margin-top:18px;font-size:.7rem;color:var(--muted);line-height:1.7">
+      Pulsa <strong style="color:var(--text)">"Resuelto (YA)"</strong> cuando el participante lo indique.
+    </div>
+  </div>
+</div>
+
+<!-- EXPERIMENT -->
+<div id="screen-experiment" class="screen">
+  <div class="lab-header">
+    <div><div class="lab-logo">Experimento Cerillas</div><div class="lab-sub">Knoblich et al. (1999)</div></div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--muted)">Participante: <span id="hdr-p" style="color:var(--accent)">—</span></div>
+  </div>
+  <div class="exp-layout">
+    <div class="left-panel">
+      <div class="info-block"><div class="info-label">Participante</div><div class="info-value accent" id="lp-p">—</div></div>
+      <div class="info-block"><div class="info-label">Bloque / Posición</div><div class="info-value" id="lp-blk">—</div></div>
+      <div class="info-block"><div class="info-label">Tipo de problema</div><div class="info-value" id="lp-type">—</div></div>
+      <div class="info-block"><div class="info-label">Orden presentación</div><div class="info-value" id="lp-ord">—</div></div>
+      <div>
+        <div class="info-label" style="margin-bottom:7px">Tiempo</div>
+        <div class="timer-big" id="timer">0:00</div>
+        <div class="tbar-wrap"><div class="tbar" id="tbar" style="width:100%"></div></div>
+      </div>
+      <div><div class="info-label" style="margin-bottom:7px">Progreso</div><div class="dots-row" id="dots"></div></div>
+      <div style="flex:1"><div class="info-label" style="margin-bottom:5px">Observaciones</div><textarea class="obs-field" id="obs" placeholder="Bloqueos, verbalizaciones, momentos de insight..."></textarea></div>
+    </div>
+    <div class="main-area">
+      <div><div class="prob-tag" id="prob-tag">—</div><div class="prob-title" id="prob-title">—</div></div>
+      <div class="eq-box" id="eq-box"></div>
+      <div class="status-msg" id="status">Haz clic en una cerilla para seleccionarla.</div>
+      <div class="move-ctr">Movimientos: <em id="move-n">0</em> / 1 permitido</div>
+      <div class="action-row">
+        <button class="btn-exp green" onclick="markSolved()">✓ Resuelto (YA)</button>
+        <button class="btn-exp red"   onclick="markFailed()">✗ Sin solución</button>
+        <button class="btn-exp"       onclick="resetSticks()">↺ Reiniciar cerillas</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="screen-results" class="screen">
+  <div class="res-card">
+    <h2>Resultados</h2>
+    <div style="color:var(--muted);font-size:.78rem;margin-bottom:6px" id="res-info"></div>
+    <table class="res-table"><thead><tr><th>Participante</th><th>Bloque</th><th>Tipo</th><th>Orden</th><th>Resuelto</th><th>Tiempo (s)</th><th>Observaciones</th></tr></thead><tbody id="res-body"></tbody></table>
+    <div style="display:flex;gap:10px">
+      <button class="btn-exp green" onclick="downloadCSV()">⬇ Descargar CSV</button>
+      <button class="btn-exp"       onclick="newSession()">+ Nueva sesión</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-back" id="m-solved"><div class="modal-box"><h3>¡Correcto!</h3><p id="m-stxt">Resultado registrado.</p><button class="btn-exp green" onclick="confirmSolved()">Continuar →</button></div></div>
+<div class="modal-back" id="m-timeout"><div class="modal-box danger"><h3>Tiempo agotado</h3><p>5 minutos superados. Se marca como no resuelto.</p><button class="btn-exp red" onclick="confirmFailed()">Continuar →</button></div></div>
+<div class="modal-back" id="m-fail"><div class="modal-box danger"><h3>Sin solución</h3><p>¿Marcar como no resuelto y continuar?</p><div class="modal-btns"><button class="btn-exp red" onclick="confirmFailed()">Sí</button><button class="btn-exp" onclick="closeModals()">Cancelar</button></div></div></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   MATCHSTICK ENGINE  — "flat stick list" approach
+   ───────────────────────────────────────────────────────────────────
+   The equation is represented as a FLAT LIST of individual sticks.
+   Each stick has:
+     { id, x, y, angle, symIdx, slotKey, occupied }
+
+   AND a separate DROP-ZONE list — every valid position in the equation
+   where a stick COULD exist (based on the complete slot catalogue for
+   each symbol position). Drop zones that are already occupied by a
+   stick are hidden; only empty ones are shown after a stick is picked.
+
+   This completely avoids the bug where "empty slots don't exist because
+   all slots start filled".
+═══════════════════════════════════════════════════════════════════ */
+
+// SVG geometry constants
+const SW = 60;   // symbol width  (bounding box)
+const SH = 96;   // symbol height
+const SGAP = 18; // gap between symbols
+const SPAD = 28; // left/right padding
+
+// Each symbol defines ALL possible stick slots.
+// slot key → {x1,y1,x2,y2} relative to symbol's top-left corner.
+// The "present" list says which slots are filled for that symbol by default.
+const SYM_DEFS = {
+  //                  possible slots                             default filled
+  'I': { w:44, slots:{ v0:{x1:22,y1:4, x2:22,y2:92} },         filled:['v0'] },
+  'V': { w:58, slots:{ l0:{x1:4, y1:4, x2:29,y2:92},
+                        r0:{x1:54,y1:4, x2:29,y2:92} },         filled:['l0','r0'] },
+  'X': { w:58, slots:{ d0:{x1:4, y1:4, x2:54,y2:92},
+                        d1:{x1:54,y1:4, x2:4, y2:92} },         filled:['d0','d1'] },
+  '=': { w:58, slots:{ h0:{x1:4, y1:30,x2:54,y2:30},
+                        h1:{x1:4, y1:66,x2:54,y2:66} },         filled:['h0','h1'] },
+  '+': { w:58, slots:{ v0:{x1:29,y1:4, x2:29,y2:92},
+                        h0:{x1:4, y1:48,x2:54,y2:48} },         filled:['v0','h0'] },
+  '-': { w:58, slots:{ h0:{x1:4, y1:48,x2:54,y2:48} },         filled:['h0'] },
+  // Compound tokens parsed below
+};
+
+/* Parse equation string → array of {char, symDef} */
+function parseEqTokens(eqStr) {
+  const out = [];
+  for (let i = 0; i < eqStr.length; i++) {
+    const ch = eqStr[i];
+    const def = SYM_DEFS[ch];
+    if (def) out.push({ ch, def });
+  }
+  return out;
+}
+
+/* Build the mutable state from an equation string.
+   Returns { sticks:[], drops:[], tokens:[] }
+
+   sticks — filled positions:  { uid, symIdx, slotKey, x1,y1,x2,y2 }
+   drops  — all possible positions: { uid, symIdx, slotKey, x1,y1,x2,y2, occupied:bool }
+*/
+function buildEquationState(eqStr) {
+  const tokens = parseEqTokens(eqStr);
+  const sticks = [];
+  const drops  = [];
+  let cx = SPAD;
+  let uid = 0;
+
+  tokens.forEach((tok, si) => {
+    const def = tok.def;
+    Object.entries(def.slots).forEach(([key, s]) => {
+      const ax = cx + s.x1, ay = s.y1;
+      const bx = cx + s.x2, by = s.y2;
+      const occupied = def.filled.includes(key);
+      const entry = { uid: uid++, symIdx: si, slotKey: key, ax, ay, bx, by, occupied };
+      drops.push(entry);
+      if (occupied) {
+        sticks.push({ uid: entry.uid, symIdx: si, slotKey: key, ax, ay, bx, by });
+      }
+    });
+    cx += def.w + SGAP;
+  });
+
+  return { sticks, drops, tokens, totalW: cx - SGAP + SPAD };
+}
+
+/* ─── Rendering ──────────────────────────────────────────────────── */
+let eqState   = null;  // current equation state
+let selectedUid = -1;  // uid of selected stick, or -1
+
+function render() {
+  const box = document.getElementById('eq-box');
+  const old = box.querySelector('svg');
+  if (old) old.remove();
+
+  const ns = 'http://www.w3.org/2000/svg';
+  const svgH = SH + 32;
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('width',  eqState.totalW);
+  svg.setAttribute('height', svgH);
+  svg.style.display = 'block';
+  svg.style.overflow = 'visible';
+
+  const hasSelected = selectedUid >= 0;
+
+  // ── 1. Draw DROP ZONES (only when a stick is selected) ──────────
+  if (hasSelected) {
+    eqState.drops.forEach(d => {
+      if (d.occupied) return;  // already has a stick → not a drop target
+      const g = document.createElementNS(ns, 'g');
+      g.style.cursor = 'pointer';
+
+      // wide invisible hit area
+      const hit = makeLine(ns, d.ax, 16+d.ay, d.bx, 16+d.by, 'transparent', 24);
+      g.appendChild(hit);
+
+      // green dashed line
+      const ln = makeLine(ns, d.ax, 16+d.ay, d.bx, 16+d.by, '#3fb950', 7);
+      ln.setAttribute('stroke-dasharray', '10 6');
+      ln.setAttribute('stroke-linecap', 'round');
+      ln.setAttribute('opacity', '0.9');
+      g.appendChild(ln);
+
+      // green head dot
+      const hd = document.createElementNS(ns, 'circle');
+      hd.setAttribute('cx', d.ax); hd.setAttribute('cy', 16+d.ay);
+      hd.setAttribute('r', '5'); hd.setAttribute('fill', '#3fb950');
+      hd.setAttribute('opacity', '0.9');
+      g.appendChild(hd);
+
+      g.addEventListener('mouseenter', () => { ln.setAttribute('opacity','1'); hd.setAttribute('opacity','1'); });
+      g.addEventListener('mouseleave', () => { ln.setAttribute('opacity','0.9'); hd.setAttribute('opacity','0.9'); });
+      g.addEventListener('click', () => dropStick(d.uid));
+      svg.appendChild(g);
+    });
+  }
+
+  // ── 2. Draw STICKS ──────────────────────────────────────────────
+  eqState.sticks.forEach(st => {
+    const isSel = (st.uid === selectedUid);
+    const g = document.createElementNS(ns, 'g');
+    g.style.cursor = 'pointer';
+
+    // wide hit area
+    const hit = makeLine(ns, st.ax, 16+st.ay, st.bx, 16+st.by, 'transparent', 22);
+    g.appendChild(hit);
+
+    // stick body
+    const ln = makeLine(ns, st.ax, 16+st.ay, st.bx, 16+st.by,
+                        isSel ? '#ffe066' : '#c8832a', 8);
+    ln.setAttribute('stroke-linecap', 'round');
+    if (isSel) g.style.filter = 'drop-shadow(0 0 9px #ffe066)';
+    g.appendChild(ln);
+
+    // match head
+    const hd = document.createElementNS(ns, 'circle');
+    hd.setAttribute('cx', st.ax); hd.setAttribute('cy', 16+st.ay);
+    hd.setAttribute('r', '6');
+    hd.setAttribute('fill', isSel ? '#fff' : '#cc3311');
+    g.appendChild(hd);
+
+    g.addEventListener('click', () => pickStick(st.uid));
+    svg.appendChild(g);
+  });
+
+  box.appendChild(svg);
+}
+
+function makeLine(ns, x1, y1, x2, y2, stroke, width) {
+  const ln = document.createElementNS(ns, 'line');
+  ln.setAttribute('x1', x1); ln.setAttribute('y1', y1);
+  ln.setAttribute('x2', x2); ln.setAttribute('y2', y2);
+  ln.setAttribute('stroke', stroke);
+  ln.setAttribute('stroke-width', width);
+  return ln;
+}
+
+/* ─── Interaction ─────────────────────────────────────────────────
+   pickStick(uid)  — user clicked a filled stick
+   dropStick(uid)  — user clicked an empty drop zone
+*/
+function pickStick(uid) {
+  if (S.movesDone >= 1) {
+    setStatus('Ya usaste el único movimiento. Pulsa ↺ para reiniciar las cerillas.', 'err');
+    return;
+  }
+  if (selectedUid === uid) {
+    // deselect
+    selectedUid = -1;
+    setStatus('Selección cancelada. Haz clic en una cerilla.', '');
+    render();
+    return;
+  }
+  selectedUid = uid;
+  setStatus('Cerilla seleccionada ✦  Haz clic en una posición verde discontinua para colocarla.', 'info');
+  render();
+}
+
+function dropStick(dropUid) {
+  if (selectedUid < 0) return;
+
+  // Find the source stick in eqState.sticks
+  const srcIdx = eqState.sticks.findIndex(s => s.uid === selectedUid);
+  if (srcIdx < 0) return;
+
+  // Find the target drop zone
+  const dstDrop = eqState.drops.find(d => d.uid === dropUid);
+  if (!dstDrop || dstDrop.occupied) return;
+
+  const src = eqState.sticks[srcIdx];
+
+  // Mark source drop zone as unoccupied
+  const srcDrop = eqState.drops.find(d => d.symIdx===src.symIdx && d.slotKey===src.slotKey);
+  if (srcDrop) srcDrop.occupied = false;
+
+  // Mark destination as occupied
+  dstDrop.occupied = true;
+
+  // Replace stick entry with new position
+  eqState.sticks[srcIdx] = {
+    uid: src.uid,
+    symIdx: dstDrop.symIdx,
+    slotKey: dstDrop.slotKey,
+    ax: dstDrop.ax, ay: dstDrop.ay,
+    bx: dstDrop.bx, by: dstDrop.by
+  };
+
+  selectedUid = -1;
+  S.movesDone = 1;
+  document.getElementById('move-n').textContent = '1';
+  render();
+
+  // Check equation validity
+  const eqStr = reconstructEq();
+  const valid  = validateEq(eqStr);
+  if (valid) {
+    setStatus(`✓ Ecuación válida: "${eqStr}". Pulsa "Resuelto (YA)" para confirmar.`, 'ok');
+  } else {
+    setStatus(`Ecuación actual: "${eqStr}". ¿El participante indica que es correcta?`, '');
+  }
+}
+
+/* Reconstruct equation string from current drop-zone occupation */
+function reconstructEq() {
+  // For each token (symbol position), determine what symbol the
+  // current filled slots best represent.
+  const n = eqState.tokens.length;
+  const result = [];
+  for (let si = 0; si < n; si++) {
+    const filledKeys = eqState.drops
+      .filter(d => d.symIdx === si && d.occupied)
+      .map(d => d.slotKey);
+    result.push(slotsToChar(si, filledKeys));
+  }
+  return result.join('');
+}
+
+/* Map a set of filled slot keys back to a Roman character.
+   We look at which original symbol's slots they match. */
+function slotsToChar(symIdx, filledKeys) {
+  const orig = eqState.tokens[symIdx].ch;
+  const count = filledKeys.length;
+  // Context-aware mapping
+  if (orig === 'I') return count >= 1 ? 'I' : '';
+  if (orig === 'V') return count >= 2 ? 'V' : count===1 ? 'I' : '';
+  if (orig === 'X') return count >= 2 ? 'X' : count===1 ? 'I' : '';
+  if (orig === '=') return count >= 2 ? '=' : count===1 ? '-' : '';
+  if (orig === '+') return count >= 2 ? '+' : count===1 ? 'I' : '';
+  if (orig === '-') return count >= 1 ? '-' : '';
+  return orig;
+}
+
+/* ─── Roman arithmetic validator ────────────────────────────────── */
+function validateEq(eqStr) {
+  const ei = eqStr.indexOf('=');
+  if (ei < 0) return false;
+  const lhs = parseRoman(eqStr.slice(0, ei));
+  const rhs = eqStr.slice(ei + 1);
+  if (lhs === null || lhs <= 0) return false;
+  let rhsVal;
+  if (rhs.includes('+')) {
+    const p = rhs.split('+'); if (p.length!==2) return false;
+    const a=parseRoman(p[0]), b=parseRoman(p[1]);
+    if (a===null||b===null) return false;
+    rhsVal = a + b;
+  } else if (rhs.includes('-')) {
+    const p = rhs.split('-'); if (p.length!==2) return false;
+    const a=parseRoman(p[0]), b=parseRoman(p[1]);
+    if (a===null||b===null) return false;
+    rhsVal = a - b;
+  } else { rhsVal = parseRoman(rhs); }
+  return rhsVal !== null && rhsVal > 0 && lhs === rhsVal;
+}
+
+function parseRoman(s) {
+  if (!s||!s.trim()) return null;
+  s = s.trim().toUpperCase();
+  if (!/^[IVXLCDM]+$/.test(s)) return null;
+  if (!/^M{0,3}(CM|CD|D?C{0,3})?(XC|XL|L?X{0,3})?(IX|IV|V?I{0,3})?$/.test(s)) return null;
+  const map={I:1,V:5,X:10,L:50,C:100,D:500,M:1000};
+  let v=0;
+  for(let i=0;i<s.length;i++){
+    const c=map[s[i]]; if(c===undefined) return null;
+    const n=map[s[i+1]];
+    if(n&&n>c){v+=n-c;i++;}else v+=c;
+  }
+  return v;
+}
+
+/* ════════════════════════════════════════════════════════
+   EXPERIMENT DATA & STATE
+════════════════════════════════════════════════════════ */
+const PROBLEMS = [
+  {block:1,type:'A',eq:'VI=VII+I'},
+  {block:1,type:'B',eq:'I=II+II'},
+  {block:1,type:'C',eq:'III=III+III'},
+  {block:1,type:'D',eq:'XI=III+III'},
+  {block:2,type:'A',eq:'II=III+I'},
+  {block:2,type:'B',eq:'III=V+III'},
+  {block:2,type:'C',eq:'IV=IV+IV'},
+  {block:2,type:'D',eq:'VI=VIII+III'}
+];
+
+let S = {
+  participant:'', blockSel:1,
+  problems:[], idx:0, results:[],
+  movesDone:0, elapsed:0, maxTime:300, timerHandle:null
+};
+
+/* ════════════════════════════════════════════════════════
+   WELCOME
+════════════════════════════════════════════════════════ */
+function setBlock(n){
+  S.blockSel=n;
+  ['bb1','bb2','bb0'].forEach(id=>document.getElementById(id).classList.remove('sel'));
+  document.getElementById(n===1?'bb1':n===2?'bb2':'bb0').classList.add('sel');
+}
+
+function startExp(){
+  const code=document.getElementById('inp-p').value.trim();
+  if(!code){alert('Introduce el código del participante.');return;}
+  S.participant=code;
+  let pool=PROBLEMS.filter(p=>S.blockSel===0||p.block===S.blockSel);
+  const byBlock={};
+  pool.forEach(p=>{(byBlock[p.block]=byBlock[p.block]||[]).push({...p});});
+  S.problems=[];
+  Object.keys(byBlock).sort().forEach(blk=>{
+    shuffle(byBlock[blk]).forEach((p,i)=>{p.orderInBlock=i+1;S.problems.push(p);});
+  });
+  S.idx=0;S.results=[];
+  document.getElementById('hdr-p').textContent=code;
+  document.getElementById('lp-p').textContent=code;
+  showScreen('screen-experiment');
+  buildDots();
+  loadProblem(0);
+}
+
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+
+/* ════════════════════════════════════════════════════════
+   LOAD PROBLEM
+════════════════════════════════════════════════════════ */
+function loadProblem(idx){
+  const p=S.problems[idx];
+  eqState=buildEquationState(p.eq);
+  selectedUid=-1;
+  S.movesDone=0;S.elapsed=0;
+
+  document.getElementById('lp-blk').textContent=`Bloque ${p.block} · ${p.orderInBlock}/4`;
+  document.getElementById('lp-type').textContent=`Tipo ${p.type}`;
+  document.getElementById('lp-ord').textContent=`${idx+1} de ${S.problems.length}`;
+  document.getElementById('prob-tag').textContent=`Bloque ${p.block}  —  Problema ${p.orderInBlock} de 4`;
+  document.getElementById('prob-title').textContent=`Tipo ${p.type}: mueve 1 cerilla para que la ecuación sea correcta`;
+  document.getElementById('obs').value='';
+  document.getElementById('move-n').textContent='0';
+  setStatus('Haz clic en una cerilla para seleccionarla.','');
+  setCurrentDot(idx);
+  render();
+
+  clearInterval(S.timerHandle);
+  updateTimer();
+  S.timerHandle=setInterval(()=>{
+    S.elapsed++;updateTimer();
+    if(S.elapsed>=S.maxTime){clearInterval(S.timerHandle);showModal('m-timeout');}
+  },1000);
+}
+
+function updateTimer(){
+  const m=Math.floor(S.elapsed/60),s=S.elapsed%60;
+  const warn=S.elapsed>=240;
+  document.getElementById('timer').textContent=`${m}:${s.toString().padStart(2,'0')}`;
+  document.getElementById('timer').className='timer-big'+(warn?' warn':'');
+  document.getElementById('tbar').style.width=((S.maxTime-S.elapsed)/S.maxTime*100)+'%';
+  document.getElementById('tbar').className='tbar'+(warn?' warn':'');
+}
+
+/* ════════════════════════════════════════════════════════
+   CONTROLS
+════════════════════════════════════════════════════════ */
+function resetSticks(){
+  if(S.movesDone>0&&!confirm('¿Reiniciar las cerillas? Se perderá el movimiento realizado.'))return;
+  const p=S.problems[S.idx];
+  eqState=buildEquationState(p.eq);
+  selectedUid=-1;S.movesDone=0;
+  document.getElementById('move-n').textContent='0';
+  setStatus('Cerillas reiniciadas. Haz clic en una cerilla.','');
+  render();
+}
+
+function markSolved(){
+  clearInterval(S.timerHandle);
+  document.getElementById('m-stxt').textContent=`Tiempo: ${S.elapsed}s. Pulsa continuar para el siguiente problema.`;
+  showModal('m-solved');
+}
+function markFailed(){showModal('m-fail');}
+function confirmSolved(){closeModals();saveResult(true);nextProblem();}
+function confirmFailed(){closeModals();clearInterval(S.timerHandle);saveResult(false);nextProblem();}
+
+function saveResult(solved){
+  const p=S.problems[S.idx];
+  const obs=document.getElementById('obs').value.trim().replace(/,/g,'；').replace(/\n/g,' ');
+  S.results.push({participant:S.participant,block:p.block,type:p.type,order:p.orderInBlock,solved:solved?'S':'N',time:S.elapsed,obs});
+  updateDot(S.idx,solved?'ok':'fail');
+}
+
+function nextProblem(){
+  S.idx++;
+  if(S.idx>=S.problems.length)showResults();
+  else{document.getElementById('obs').value='';loadProblem(S.idx);}
+}
+
+/* ════════════════════════════════════════════════════════
+   DOTS
+════════════════════════════════════════════════════════ */
+function buildDots(){
+  const c=document.getElementById('dots');c.innerHTML='';
+  S.problems.forEach((p,i)=>{
+    const d=document.createElement('div');
+    d.className='dot'+(i===0?' cur':'');d.id=`d${i}`;
+    d.textContent=p.type;d.title=`Bloque ${p.block} Tipo ${p.type}`;
+    c.appendChild(d);
+  });
+}
+function setCurrentDot(idx){document.querySelectorAll('.dot').forEach(d=>d.classList.remove('cur'));const d=document.getElementById(`d${idx}`);if(d)d.classList.add('cur');}
+function updateDot(idx,cls){const d=document.getElementById(`d${idx}`);if(!d)return;d.classList.remove('cur','ok','fail');d.classList.add(cls);}
+
+/* ════════════════════════════════════════════════════════
+   RESULTS & CSV
+════════════════════════════════════════════════════════ */
+function showResults(){
+  showScreen('screen-results');
+  document.getElementById('res-info').textContent=`Participante: ${S.participant} — ${S.results.length} problemas completados`;
+  const tb=document.getElementById('res-body');tb.innerHTML='';
+  S.results.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${r.participant}</td><td>${r.block}</td><td>${r.type}</td><td>${r.order}</td><td class="${r.solved==='S'?'cell-ok':'cell-fail'}">${r.solved}</td><td>${r.time}</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.obs}">${r.obs||'—'}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+function downloadCSV(){
+  const hdr='Participante,Bloque,Tipo_Problema,Orden_Presentacion,Resuelto,Tiempo_Segundos,Observaciones';
+  const rows=S.results.map(r=>`${r.participant},${r.block},${r.type},${r.order},${r.solved},${r.time},"${r.obs}"`);
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([[hdr,...rows].join('\n')],{type:'text/csv;charset=utf-8;'}));
+  a.download=`knoblich_${S.participant}_${Date.now()}.csv`;
+  a.click();
+}
+
+function newSession(){clearInterval(S.timerHandle);document.getElementById('inp-p').value='';setBlock(1);showScreen('screen-welcome');}
+
+/* ════════════════════════════════════════════════════════
+   UI HELPERS
+════════════════════════════════════════════════════════ */
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function showModal(id){document.querySelectorAll('.modal-back').forEach(m=>m.classList.remove('show'));document.getElementById(id).classList.add('show');}
+function closeModals(){document.querySelectorAll('.modal-back').forEach(m=>m.classList.remove('show'));}
+function setStatus(msg,cls){const el=document.getElementById('status');el.textContent=msg;el.className='status-msg'+(cls?' '+cls:'');}
+</script>
+</body>
+</html>
