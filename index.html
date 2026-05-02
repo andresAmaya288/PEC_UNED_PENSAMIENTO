@@ -45,7 +45,8 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 .main-area{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 32px;gap:20px;}
 .prob-tag{font-family:'Share Tech Mono',monospace;font-size:.68rem;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;text-align:center;}
 .prob-title{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;color:var(--text);text-align:center;margin-top:4px;}
-.eq-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px 40px;display:flex;align-items:center;justify-content:center;min-height:170px;}
+.eq-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px 40px;display:flex;align-items:center;justify-content:center;min-height:170px;width:100%;max-width:100%;overflow:hidden;}
+.eq-box svg{display:block;max-width:100%;height:auto;}
 .status-msg{min-height:22px;font-family:'Share Tech Mono',monospace;font-size:.82rem;text-align:center;color:var(--muted);max-width:600px;}
 .status-msg.ok{color:var(--success);}.status-msg.err{color:var(--danger);}.status-msg.info{color:var(--accent2);}
 .move-ctr{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--muted);text-align:center;}
@@ -70,6 +71,23 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 .res-table td{padding:7px 10px;border-bottom:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:.78rem;}
 .res-table tr:last-child td{border-bottom:none;}
 .cell-ok{color:var(--success);}.cell-fail{color:var(--danger);}
+@media (max-width: 900px){
+  .exp-layout{grid-template-columns:1fr;}
+  .left-panel{border-right:none;border-bottom:1px solid var(--border);max-height:38vh;}
+  .main-area{padding:22px 16px;}
+  .eq-box{padding:18px 12px;min-height:140px;}
+  .prob-title{font-size:1.1rem;}
+}
+@media (max-width: 640px){
+  .lab-header{padding:10px 14px;gap:8px;flex-direction:column;align-items:flex-start;}
+  .welcome-card{padding:28px 18px;max-width:100%;margin:16px;}
+  .main-area{padding:18px 12px;gap:16px;}
+  .eq-box{padding:14px 10px;min-height:120px;border-radius:10px;}
+  .action-row{width:100%;}
+  .action-row .btn-exp{width:100%;}
+  .modal-box{padding:24px 18px;max-width:calc(100vw - 24px);}
+  .res-card{padding:24px 16px;}
+}
 ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 </style>
 </head>
@@ -307,7 +325,12 @@ function render() {
   const {off, totalW} = getOffsets();
   svg.setAttribute('width', totalW);
   svg.setAttribute('height', BH + 10);
+  svg.setAttribute('viewBox', `0 0 ${totalW} ${BH + 10}`);
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
   svg.style.display = 'block';
+  svg.style.width = '100%';
+  svg.style.maxWidth = '100%';
+  svg.style.height = 'auto';
   svg.style.overflow = 'visible';
 
   const hasSel = selUid >= 0;
