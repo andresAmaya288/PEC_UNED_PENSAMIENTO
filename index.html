@@ -148,307 +148,337 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 <div class="modal-back" id="m-fail"><div class="modal-box danger"><h3>Sin solución</h3><p>¿Marcar como no resuelto y continuar?</p><div class="modal-btns"><button class="btn-exp red" onclick="confirmFailed()">Sí</button><button class="btn-exp" onclick="closeModals()">Cancelar</button></div></div></div>
 
 <script>
-/* ═══════════════════════════════════════════════════════════════════
-   MATCHSTICK ENGINE  — "flat stick list" approach
-   ───────────────────────────────────────────────────────────────────
-   The equation is represented as a FLAT LIST of individual sticks.
-   Each stick has:
-     { id, x, y, angle, symIdx, slotKey, occupied }
+/* ══════════════════════════════════════════════════════════════
+   SLOT MODEL — | \ / | \ /
+   ══════════════════════════════════════════════════════════════
+   Each numeral character position has 7 slots:
 
-   AND a separate DROP-ZONE list — every valid position in the equation
-   where a stick COULD exist (based on the complete slot catalogue for
-   each symbol position). Drop zones that are already occupied by a
-   stick are hidden; only empty ones are shown after a stick is picked.
+     v1  o1  o2  v2  o3  o4  v3
+     |    \  /   |   \  /   |
 
-   This completely avoids the bug where "empty slots don't exist because
-   all slots start filled".
-═══════════════════════════════════════════════════════════════════ */
+   Positions (BW=90, BH=140):
+     v1  x=8  (left vertical)
+     o1  (8,5)→(46,135)   \ — V left arm, also X left diagonal
+     o2  (46,5)→(8,135)   / — X right diagonal (crosses o1 in left half)
+     v2  x=46 (center vertical = "hueco" del V)
+     o3  (46,5)→(82,135)  \ — X right-half-left
+     o4  (82,5)→(46,135)  / — V right arm
+     v3  x=82 (right vertical)
 
-// SVG geometry constants
-const SW = 60;   // symbol width  (bounding box)
-const SH = 96;   // symbol height
-const SGAP = 18; // gap between symbols
-const SPAD = 28; // left/right padding
+   Character fills:
+     I  →  [v1]          single left vertical
+     V  →  [o1, o4]      full-width V, converge at (46,135), v2=empty gap
+     X  →  [o1, o2]      cross at (27,70) in left half
 
-// Each symbol defines ALL possible stick slots.
-// slot key → {x1,y1,x2,y2} relative to symbol's top-left corner.
-// The "present" list says which slots are filled for that symbol by default.
-const SYM_DEFS = {
-  //                  possible slots                             default filled
-  'I': { w:44, slots:{ v0:{x1:22,y1:4, x2:22,y2:92} },         filled:['v0'] },
-  'V': { w:58, slots:{ l0:{x1:4, y1:4, x2:29,y2:92},
-                        r0:{x1:54,y1:4, x2:29,y2:92} },         filled:['l0','r0'] },
-  'X': { w:58, slots:{ d0:{x1:4, y1:4, x2:54,y2:92},
-                        d1:{x1:54,y1:4, x2:4, y2:92} },         filled:['d0','d1'] },
-  '=': { w:58, slots:{ h0:{x1:4, y1:30,x2:54,y2:30},
-                        h1:{x1:4, y1:66,x2:54,y2:66} },         filled:['h0','h1'] },
-  '+': { w:58, slots:{ v0:{x1:29,y1:4, x2:29,y2:92},
-                        h0:{x1:4, y1:48,x2:54,y2:48} },         filled:['v0','h0'] },
-  '-': { w:58, slots:{ h0:{x1:4, y1:48,x2:54,y2:48} },         filled:['h0'] },
-  // Compound tokens parsed below
+   Operators (BW=90, BH=140):
+     vC  (45,5)→(45,135)  vertical
+     hT  (8,42)→(82,42)   top horizontal
+     hM  (8,70)→(82,70)   mid horizontal
+     hB  (8,98)→(82,98)   bottom horizontal
+
+     =  → [hT, hB]
+     +  → [vC, hM]
+     -  → [hM]
+══════════════════════════════════════════════════════════════ */
+
+const BW = 90, BH = 140;
+
+const NUM_SLOTS = {
+  v1: {x1:8,  y1:5,  x2:8,  y2:135},
+  o1: {x1:8,  y1:5,  x2:46, y2:135},
+  o2: {x1:46, y1:5,  x2:8,  y2:135},
+  v2: {x1:46, y1:5,  x2:46, y2:135},
+  o3: {x1:46, y1:5,  x2:82, y2:135},
+  o4: {x1:82, y1:5,  x2:46, y2:135},
+  v3: {x1:82, y1:5,  x2:82, y2:135},
 };
 
-/* Parse equation string → array of {char, symDef} */
-function parseEqTokens(eqStr) {
-  const out = [];
-  for (let i = 0; i < eqStr.length; i++) {
-    const ch = eqStr[i];
-    const def = SYM_DEFS[ch];
-    if (def) out.push({ ch, def });
-  }
-  return out;
+const OP_SLOTS = {
+  vC: {x1:45, y1:5,  x2:45, y2:135},
+  hT: {x1:8,  y1:42, x2:82, y2:42},
+  hM: {x1:8,  y1:70, x2:82, y2:70},
+  hB: {x1:8,  y1:98, x2:82, y2:98},
+};
+
+const CHAR_DEF = {
+  'I': {type:'num', filled:['v1']},
+  'V': {type:'num', filled:['o1','o4']},
+  'X': {type:'num', filled:['o1','o2']},
+  '=': {type:'op',  filled:['hT','hB']},
+  '+': {type:'op',  filled:['vC','hM']},
+  '-': {type:'op',  filled:['hM']},
+};
+
+const GAP_REG = 6;
+const GAP_OP  = 22;
+const PAD     = 24;
+
+let TOKENS = [];
+let slots = [];
+let selUid = -1;
+let movesDone = 0;
+
+function loadEquation(eqStr) {
+  TOKENS = eqStr.split('');
+  buildState();
+  selUid = -1;
+  movesDone = 0;
+  document.getElementById('move-n').textContent = '0';
+  document.getElementById('eq-label').textContent = 'Ecuación: ' + eqStr.replace(/=/g,' = ').replace(/\+/g,' + ').replace(/-/g,' - ');
+  setStatus('Haz clic en una cerilla para seleccionarla.', '');
+  render();
 }
 
-/* Build the mutable state from an equation string.
-   Returns { sticks:[], drops:[], tokens:[] }
-
-   sticks — filled positions:  { uid, symIdx, slotKey, x1,y1,x2,y2 }
-   drops  — all possible positions: { uid, symIdx, slotKey, x1,y1,x2,y2, occupied:bool }
-*/
-function buildEquationState(eqStr) {
-  const tokens = parseEqTokens(eqStr);
-  const sticks = [];
-  const drops  = [];
-  let cx = SPAD;
+function buildState() {
+  slots = [];
   let uid = 0;
-
-  tokens.forEach((tok, si) => {
-    const def = tok.def;
-    Object.entries(def.slots).forEach(([key, s]) => {
-      const ax = cx + s.x1, ay = s.y1;
-      const bx = cx + s.x2, by = s.y2;
-      const occupied = def.filled.includes(key);
-      const entry = { uid: uid++, symIdx: si, slotKey: key, ax, ay, bx, by, occupied };
-      drops.push(entry);
-      if (occupied) {
-        sticks.push({ uid: entry.uid, symIdx: si, slotKey: key, ax, ay, bx, by });
-      }
+  TOKENS.forEach((ch, ti) => {
+    const def = CHAR_DEF[ch];
+    const defs = def.type === 'num' ? NUM_SLOTS : OP_SLOTS;
+    Object.entries(defs).forEach(([sid, c]) => {
+      slots.push({uid:uid++, ti, sid, type:def.type,
+                  x1:c.x1, y1:c.y1, x2:c.x2, y2:c.y2,
+                  filled: def.filled.includes(sid)});
     });
-    cx += def.w + SGAP;
   });
-
-  return { sticks, drops, tokens, totalW: cx - SGAP + SPAD };
 }
 
-/* ─── Rendering ──────────────────────────────────────────────────── */
-let eqState   = null;  // current equation state
-let selectedUid = -1;  // uid of selected stick, or -1
+function buildEquationState(eqStr) {
+  TOKENS = eqStr.split('');
+  buildState();
+  const byToken = {};
+  slots.forEach(s => { (byToken[s.ti] = byToken[s.ti] || []).push(s); });
+  const sticks = slots.filter(s => s.filled).map(s => ({
+    uid: s.uid,
+    symIdx: s.ti,
+    slotKey: s.sid,
+    ax: s.x1,
+    ay: s.y1,
+    bx: s.x2,
+    by: s.y2,
+  }));
+  const drops = slots.map(s => ({
+    uid: s.uid,
+    symIdx: s.ti,
+    slotKey: s.sid,
+    ax: s.x1,
+    ay: s.y1,
+    bx: s.x2,
+    by: s.y2,
+    occupied: s.filled,
+  }));
+  return { sticks, drops, tokens: TOKENS, totalW: getOffsets().totalW };
+}
+
+function getOffsets() {
+  const off = [];
+  let cx = PAD;
+  TOKENS.forEach((ch, ti) => {
+    if (ti > 0) {
+      const prev = TOKENS[ti-1];
+      const isOp = c => c === '=' || c === '+' || c === '-';
+      cx += (isOp(prev) || isOp(ch)) ? GAP_OP : GAP_REG;
+    }
+    off.push(cx);
+    cx += BW;
+  });
+  return {off, totalW: cx + PAD};
+}
+
+const NS = 'http://www.w3.org/2000/svg';
 
 function render() {
   const box = document.getElementById('eq-box');
   const old = box.querySelector('svg');
   if (old) old.remove();
 
-  const ns = 'http://www.w3.org/2000/svg';
-  const svgH = SH + 32;
-  const svg = document.createElementNS(ns, 'svg');
-  svg.setAttribute('width',  eqState.totalW);
-  svg.setAttribute('height', svgH);
+  const svg = document.createElementNS(NS, 'svg');
+  const {off, totalW} = getOffsets();
+  svg.setAttribute('width', totalW);
+  svg.setAttribute('height', BH + 10);
   svg.style.display = 'block';
   svg.style.overflow = 'visible';
 
-  const hasSelected = selectedUid >= 0;
+  const hasSel = selUid >= 0;
+  const byToken = {};
+  slots.forEach(s => { (byToken[s.ti] = byToken[s.ti]||[]).push(s); });
 
-  // ── 1. Draw DROP ZONES (only when a stick is selected) ──────────
-  if (hasSelected) {
-    eqState.drops.forEach(d => {
-      if (d.occupied) return;  // already has a stick → not a drop target
-      const g = document.createElementNS(ns, 'g');
-      g.style.cursor = 'pointer';
+  TOKENS.forEach((ch, ti) => {
+    const ox = off[ti], oy = 5;
+    const ts = byToken[ti] || [];
 
-      // wide invisible hit area
-      const hit = makeLine(ns, d.ax, 16+d.ay, d.bx, 16+d.by, 'transparent', 24);
-      g.appendChild(hit);
-
-      // green dashed line
-      const ln = makeLine(ns, d.ax, 16+d.ay, d.bx, 16+d.by, '#3fb950', 7);
-      ln.setAttribute('stroke-dasharray', '10 6');
-      ln.setAttribute('stroke-linecap', 'round');
-      ln.setAttribute('opacity', '0.9');
-      g.appendChild(ln);
-
-      // green head dot
-      const hd = document.createElementNS(ns, 'circle');
-      hd.setAttribute('cx', d.ax); hd.setAttribute('cy', 16+d.ay);
-      hd.setAttribute('r', '5'); hd.setAttribute('fill', '#3fb950');
-      hd.setAttribute('opacity', '0.9');
-      g.appendChild(hd);
-
-      g.addEventListener('mouseenter', () => { ln.setAttribute('opacity','1'); hd.setAttribute('opacity','1'); });
-      g.addEventListener('mouseleave', () => { ln.setAttribute('opacity','0.9'); hd.setAttribute('opacity','0.9'); });
-      g.addEventListener('click', () => dropStick(d.uid));
-      svg.appendChild(g);
+    if (hasSel) {
+      ts.forEach(sl => {
+        if (!sl.filled) drawDrop(svg, sl, ox, oy);
+      });
+    }
+    ts.forEach(sl => {
+      if (sl.filled) drawStick(svg, sl, ox, oy, sl.uid === selUid);
     });
-  }
-
-  // ── 2. Draw STICKS ──────────────────────────────────────────────
-  eqState.sticks.forEach(st => {
-    const isSel = (st.uid === selectedUid);
-    const g = document.createElementNS(ns, 'g');
-    g.style.cursor = 'pointer';
-
-    // wide hit area
-    const hit = makeLine(ns, st.ax, 16+st.ay, st.bx, 16+st.by, 'transparent', 22);
-    g.appendChild(hit);
-
-    // stick body
-    const ln = makeLine(ns, st.ax, 16+st.ay, st.bx, 16+st.by,
-                        isSel ? '#ffe066' : '#c8832a', 8);
-    ln.setAttribute('stroke-linecap', 'round');
-    if (isSel) g.style.filter = 'drop-shadow(0 0 9px #ffe066)';
-    g.appendChild(ln);
-
-    // match head
-    const hd = document.createElementNS(ns, 'circle');
-    hd.setAttribute('cx', st.ax); hd.setAttribute('cy', 16+st.ay);
-    hd.setAttribute('r', '6');
-    hd.setAttribute('fill', isSel ? '#fff' : '#cc3311');
-    g.appendChild(hd);
-
-    g.addEventListener('click', () => pickStick(st.uid));
-    svg.appendChild(g);
   });
 
   box.appendChild(svg);
 }
 
-function makeLine(ns, x1, y1, x2, y2, stroke, width) {
-  const ln = document.createElementNS(ns, 'line');
-  ln.setAttribute('x1', x1); ln.setAttribute('y1', y1);
-  ln.setAttribute('x2', x2); ln.setAttribute('y2', y2);
-  ln.setAttribute('stroke', stroke);
-  ln.setAttribute('stroke-width', width);
-  return ln;
+function drawStick(svg, sl, ox, oy, sel) {
+  const g = document.createElementNS(NS, 'g');
+  g.style.cursor = 'pointer';
+
+  g.appendChild(mkLn(ox+sl.x1, oy+sl.y1, ox+sl.x2, oy+sl.y2, 'transparent', 26));
+
+  const body = mkLn(ox+sl.x1, oy+sl.y1, ox+sl.x2, oy+sl.y2, sel ? '#f5b73b' : '#c8832a', 10);
+  body.setAttribute('stroke-linecap', 'round');
+  g.appendChild(body);
+
+  const hd = document.createElementNS(NS, 'circle');
+  hd.setAttribute('cx', ox+sl.x1);
+  hd.setAttribute('cy', oy+sl.y1);
+  hd.setAttribute('r', '7');
+  hd.setAttribute('fill', sel ? '#fff' : '#cc3311');
+  g.appendChild(hd);
+
+  if (sel) g.style.filter = 'drop-shadow(0 0 10px rgba(255,220,80,0.95))';
+  g.addEventListener('click', e => { e.stopPropagation(); onPick(sl.uid); });
+  svg.appendChild(g);
 }
 
-/* ─── Interaction ─────────────────────────────────────────────────
-   pickStick(uid)  — user clicked a filled stick
-   dropStick(uid)  — user clicked an empty drop zone
-*/
-function pickStick(uid) {
-  if (S.movesDone >= 1) {
-    setStatus('Ya usaste el único movimiento. Pulsa ↺ para reiniciar las cerillas.', 'err');
-    return;
-  }
-  if (selectedUid === uid) {
-    // deselect
-    selectedUid = -1;
-    setStatus('Selección cancelada. Haz clic en una cerilla.', '');
-    render();
-    return;
-  }
-  selectedUid = uid;
-  setStatus('Cerilla seleccionada ✦  Haz clic en una posición verde discontinua para colocarla.', 'info');
+function drawDrop(svg, sl, ox, oy) {
+  const g = document.createElementNS(NS, 'g');
+  g.style.cursor = 'pointer';
+
+  g.appendChild(mkLn(ox+sl.x1, oy+sl.y1, ox+sl.x2, oy+sl.y2, 'transparent', 26));
+
+  const dash = mkLn(ox+sl.x1, oy+sl.y1, ox+sl.x2, oy+sl.y2, 'rgba(50,180,70,0.45)', 8);
+  dash.setAttribute('stroke-linecap', 'round');
+  dash.setAttribute('stroke-dasharray', '12 8');
+  g.appendChild(dash);
+
+  const dot = document.createElementNS(NS, 'circle');
+  dot.setAttribute('cx', ox+sl.x1);
+  dot.setAttribute('cy', oy+sl.y1);
+  dot.setAttribute('r', '5');
+  dot.setAttribute('fill', 'rgba(50,180,70,0.45)');
+  g.appendChild(dot);
+
+  g.addEventListener('mouseenter', () => {
+    dash.setAttribute('stroke', 'rgba(50,180,70,0.85)');
+    dot.setAttribute('fill', 'rgba(50,180,70,0.85)');
+  });
+  g.addEventListener('mouseleave', () => {
+    dash.setAttribute('stroke', 'rgba(50,180,70,0.45)');
+    dot.setAttribute('fill', 'rgba(50,180,70,0.45)');
+  });
+  g.addEventListener('click', e => { e.stopPropagation(); onDrop(sl.uid); });
+  svg.appendChild(g);
+}
+
+function mkLn(x1,y1,x2,y2,stroke,width) {
+  const l = document.createElementNS(NS,'line');
+  l.setAttribute('x1',x1); l.setAttribute('y1',y1);
+  l.setAttribute('x2',x2); l.setAttribute('y2',y2);
+  l.setAttribute('stroke',stroke); l.setAttribute('stroke-width',width);
+  return l;
+}
+
+function onPick(uid) {
+  if (movesDone >= 1) { setStatus('Ya usaste el movimiento. ↺ Reiniciar.', 'err'); return; }
+  if (selUid === uid) { selUid = -1; setStatus('Selección cancelada.', ''); render(); return; }
+  selUid = uid;
+  setStatus('Cerilla seleccionada ✦ Clic en hueco verde para moverla.', 'info');
   render();
 }
 
-function dropStick(dropUid) {
-  if (selectedUid < 0) return;
-
-  // Find the source stick in eqState.sticks
-  const srcIdx = eqState.sticks.findIndex(s => s.uid === selectedUid);
-  if (srcIdx < 0) return;
-
-  // Find the target drop zone
-  const dstDrop = eqState.drops.find(d => d.uid === dropUid);
-  if (!dstDrop || dstDrop.occupied) return;
-
-  const src = eqState.sticks[srcIdx];
-
-  // Mark source drop zone as unoccupied
-  const srcDrop = eqState.drops.find(d => d.symIdx===src.symIdx && d.slotKey===src.slotKey);
-  if (srcDrop) srcDrop.occupied = false;
-
-  // Mark destination as occupied
-  dstDrop.occupied = true;
-
-  // Replace stick entry with new position
-  eqState.sticks[srcIdx] = {
-    uid: src.uid,
-    symIdx: dstDrop.symIdx,
-    slotKey: dstDrop.slotKey,
-    ax: dstDrop.ax, ay: dstDrop.ay,
-    bx: dstDrop.bx, by: dstDrop.by
-  };
-
-  selectedUid = -1;
-  S.movesDone = 1;
-  document.getElementById('move-n').textContent = '1';
+function onDrop(uid) {
+  if (selUid < 0) return;
+  const src = slots.find(s => s.uid === selUid);
+  const dst = slots.find(s => s.uid === uid);
+  if (!src || !dst || dst.filled || src.uid === dst.uid) return;
+  src.filled = false;
+  dst.filled = true;
+  selUid = -1;
+  movesDone++;
+  document.getElementById('move-n').textContent = movesDone;
   render();
+  const eq = readEq();
+  document.getElementById('eq-label').textContent = 'Resultado: ' + eq;
+  if (validateEq(eq)) setStatus('✓ ¡Correcto! ' + eq, 'ok');
+  else setStatus('Ecuación actual: ' + eq + ' ← ¿Correcto?', '');
+}
 
-  // Check equation validity
-  const eqStr = reconstructEq();
-  const valid  = validateEq(eqStr);
-  if (valid) {
-    setStatus(`✓ Ecuación válida: "${eqStr}". Pulsa "Resuelto (YA)" para confirmar.`, 'ok');
-  } else {
-    setStatus(`Ecuación actual: "${eqStr}". ¿El participante indica que es correcta?`, '');
+function readEq() {
+  const byToken = {};
+  slots.forEach(s => { (byToken[s.ti] = byToken[s.ti] || []).push(s); });
+  return TOKENS.map((ch, ti) => {
+    const filled = (byToken[ti] || []).filter(s => s.filled).map(s => s.sid).sort();
+    return slotsToChar(filled, (byToken[ti] || [])[0]?.type || 'num');
+  }).join('');
+}
+
+function slotsToChar(ids, type) {
+  if (ids.length === 0) return '';
+
+  if (type === 'op') {
+    const vh = ids.filter(id => id === 'vC').length;
+    const hh = ids.filter(id => id.startsWith('h')).length;
+    if (vh === 1 && hh >= 1) return '+';
+    if (hh >= 2 && vh === 0) return '=';
+    if (hh === 1 && vh === 0) return '-';
+    if (vh === 1 && hh === 0) return 'I';
+    return '?';
   }
-}
 
-/* Reconstruct equation string from current drop-zone occupation */
-function reconstructEq() {
-  // For each token (symbol position), determine what symbol the
-  // current filled slots best represent.
-  const n = eqState.tokens.length;
-  const result = [];
-  for (let si = 0; si < n; si++) {
-    const filledKeys = eqState.drops
-      .filter(d => d.symIdx === si && d.occupied)
-      .map(d => d.slotKey);
-    result.push(slotsToChar(si, filledKeys));
+  const vs = ids.filter(id => id === 'v1' || id === 'v2' || id === 'v3');
+  const ds = ids.filter(id => id.startsWith('o'));
+
+  if (ds.length === 0 && vs.length > 0) return 'I'.repeat(vs.length);
+  if (ds.includes('o1') && ds.includes('o4') && ds.length === 2 && vs.length === 0) return 'V';
+  if (ds.includes('o1') && ds.includes('o2') && ds.length === 2 && vs.length === 0) return 'X';
+  if (ds.includes('o3') && ds.includes('o4') && ds.length === 2 && vs.length === 0) return 'X';
+  if (ds.includes('o1') && ds.includes('o4')) {
+    const extra = vs.length;
+    return 'V' + 'I'.repeat(extra);
   }
-  return result.join('');
+  if ((ds.includes('o1') && ds.includes('o2')) || (ds.includes('o3') && ds.includes('o4'))) {
+    const extra = vs.length;
+    return 'X' + 'I'.repeat(extra);
+  }
+  if (ds.length === 1 && vs.length === 0) return '?';
+  if (ds.length === 1 && vs.length > 0) return 'I'.repeat(vs.length);
+  return '?';
 }
 
-/* Map a set of filled slot keys back to a Roman character.
-   We look at which original symbol's slots they match. */
-function slotsToChar(symIdx, filledKeys) {
-  const orig = eqState.tokens[symIdx].ch;
-  const count = filledKeys.length;
-  // Context-aware mapping
-  if (orig === 'I') return count >= 1 ? 'I' : '';
-  if (orig === 'V') return count >= 2 ? 'V' : count===1 ? 'I' : '';
-  if (orig === 'X') return count >= 2 ? 'X' : count===1 ? 'I' : '';
-  if (orig === '=') return count >= 2 ? '=' : count===1 ? '-' : '';
-  if (orig === '+') return count >= 2 ? '+' : count===1 ? 'I' : '';
-  if (orig === '-') return count >= 1 ? '-' : '';
-  return orig;
-}
-
-/* ─── Roman arithmetic validator ────────────────────────────────── */
-function validateEq(eqStr) {
-  const ei = eqStr.indexOf('=');
-  if (ei < 0) return false;
-  const lhs = parseRoman(eqStr.slice(0, ei));
-  const rhs = eqStr.slice(ei + 1);
+function validateEq(eq) {
+  if (!eq || eq.includes('?')) return false;
+  const ei = eq.indexOf('='); if (ei < 0) return false;
+  const lhs = parseRoman(eq.slice(0, ei));
+  const rhs = eq.slice(ei + 1);
   if (lhs === null || lhs <= 0) return false;
-  let rhsVal;
+  let r;
   if (rhs.includes('+')) {
-    const p = rhs.split('+'); if (p.length!==2) return false;
-    const a=parseRoman(p[0]), b=parseRoman(p[1]);
-    if (a===null||b===null) return false;
-    rhsVal = a + b;
+    const p = rhs.split('+'); if (p.length !== 2) return false;
+    const a = parseRoman(p[0]), b = parseRoman(p[1]);
+    if (a === null || b === null) return false;
+    r = a + b;
   } else if (rhs.includes('-')) {
-    const p = rhs.split('-'); if (p.length!==2) return false;
-    const a=parseRoman(p[0]), b=parseRoman(p[1]);
-    if (a===null||b===null) return false;
-    rhsVal = a - b;
-  } else { rhsVal = parseRoman(rhs); }
-  return rhsVal !== null && rhsVal > 0 && lhs === rhsVal;
+    const p = rhs.split('-'); if (p.length !== 2) return false;
+    const a = parseRoman(p[0]), b = parseRoman(p[1]);
+    if (a === null || b === null) return false;
+    r = a - b;
+  } else r = parseRoman(rhs);
+  return r !== null && r > 0 && lhs === r;
 }
 
 function parseRoman(s) {
-  if (!s||!s.trim()) return null;
+  if (!s) return 0;
   s = s.trim().toUpperCase();
-  if (!/^[IVXLCDM]+$/.test(s)) return null;
-  if (!/^M{0,3}(CM|CD|D?C{0,3})?(XC|XL|L?X{0,3})?(IX|IV|V?I{0,3})?$/.test(s)) return null;
-  const map={I:1,V:5,X:10,L:50,C:100,D:500,M:1000};
-  let v=0;
-  for(let i=0;i<s.length;i++){
-    const c=map[s[i]]; if(c===undefined) return null;
-    const n=map[s[i+1]];
-    if(n&&n>c){v+=n-c;i++;}else v+=c;
+  const m = { I:1, V:5, X:10, L:50, C:100 };
+  if (!/^[IVXLCDM]+$/.test(s)) return -1;
+  if (!/^M{0,3}(CM|CD|D?C{0,3})?(XC|XL|L?X{0,3})?(IX|IV|V?I{0,3})?$/.test(s)) return -1;
+  let v = 0;
+  for (let i = 0; i < s.length; i++) {
+    const c = m[s[i]]; if (c === undefined) return -1;
+    const n = m[s[i + 1]] || 0;
+    if (n > c) { v += n - c; i++; } else v += c;
   }
   return v;
 }
