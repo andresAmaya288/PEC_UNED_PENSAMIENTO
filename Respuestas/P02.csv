@@ -1,9 +1,9 @@
 Participante,Bloque,Tipo_Problema,Orden_Presentacion,Resuelto,Tiempo_Segundos,Observaciones
-RKN0BL1CH,1,B,1,N,165,"Intento de poner no es igual"
-RKN0BL1CH,1,C,2,N,114,"Intenté escribir VI = III + III； en números romanos. Lo estoy haciendo en móvil"
-RKN0BL1CH,1,D,3,S,32,"Ahora sí. No solo vale que parezca el símbolo más o menos； sino que las cerillas deben formar el ángulo correcto. V ≠ I/"
-RKN0BL1CH,1,A,4,S,53,"En el primero ni siquiera tuve en cuenta que era un números romanos； se me olvidó. Cada vez es más fácil"
-RKN0BL1CH,2,A,1,S,8,"Sin más"
-RKN0BL1CH,2,D,2,S,52,"Me ha costado varios intentos escribir la X en móvil."
-RKN0BL1CH,2,C,3,N,300,"Este es más difícil. Le daba vueltas a poner alguna X； a cambiar el símbolo de sumar por restar... El hecho de que todos sean IV limita las opciones ya que no se puede añadir ninguna cerilla en la resta ni la suma (IIV es incorrecto； IVI también lo es)"
-RKN0BL1CH,2,B,4,N,193,"Es curioso como el programa acepta algunos símbolos como un símbolo de sumar combinado con un igual (lo considera un igual) pero no otros como una / como un I (quizás es más bien porque IIII es incorrecto； teniendo que poner IV)"
+P02,1,B,1,N,165,Intento de poner no es igual
+P02,1,C,2,N,114,Intenté escribir VI = III + III； en números romanos. Lo estoy haciendo en móvil
+P02,1,D,3,S,32,Ahora sí. No solo vale que parezca el símbolo más o menos； sino que las cerillas deben formar el ángulo correcto. V ≠ I/
+P02,1,A,4,S,53,En el primero ni siquiera tuve en cuenta que era un números romanos； se me olvidó. Cada vez es más fácil
+P02,2,A,1,S,8,Sin más
+P02,2,D,2,S,52,Me ha costado varios intentos escribir la X en móvil.
+P02,2,C,3,N,300,Este es más difícil. Le daba vueltas a poner alguna X； a cambiar el símbolo de sumar por restar... El hecho de que todos sean IV limita las opciones ya que no se puede añadir ninguna cerilla en la resta ni la suma (IIV es incorrecto； IVI también lo es)
+P02,2,B,4,N,193,Es curioso como el programa acepta algunos símbolos como un símbolo de sumar combinado con un igual (lo considera un igual) pero no otros como una / como un I (quizás es más bien porque IIII es incorrecto； teniendo que poner IV)

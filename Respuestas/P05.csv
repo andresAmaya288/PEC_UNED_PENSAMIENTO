@@ -1,9 +1,9 @@
 Participante,Bloque,Tipo_Problema,Orden_Presentacion,Resuelto,Tiempo_Segundos,Observaciones
-TP1,1,C,1,S,225,"Yupi"
-TP1,1,A,2,S,61,"Me daba error por no ponerlo  derecho"
-TP1,1,D,3,S,23,"Yupi"
-TP1,1,B,4,S,250,"Yupi"
-TP1,2,B,1,S,69,"Yupi"
-TP1,2,C,2,S,53,"Yupi"
-TP1,2,D,3,S,283,"Yupi"
-TP1,2,A,4,S,45,"Yupi"
+P05,1,C,1,S,225,Yupi
+P05,1,A,2,S,61,Me daba error por no ponerlo  derecho
+P05,1,D,3,S,23,Yupi
+P05,1,B,4,S,250,Yupi
+P05,2,B,1,S,69,Yupi
+P05,2,C,2,S,53,Yupi
+P05,2,D,3,S,283,Yupi
+P05,2,A,4,S,45,Yupi

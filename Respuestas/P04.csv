@@ -1,9 +1,9 @@
 Participante,Bloque,Tipo_Problema,Orden_Presentacion,Resuelto,Tiempo_Segundos,Observaciones
-T1,1,D,1,S,21,"Lo intenté en el móvil； y me salió mal； pues me costaba que las cerillas respondieran. Entonces abandoné. Hoy lo retomo en el ordenador."
-T1,1,C,2,S,35,"Tres igual a tres igual a tres."
-T1,1,B,3,S,35,"Estas problemas de lógica con cálculo mental no se me dan mal"
-T1,1,A,4,S,205,"Este en el primer intento en el móvil； creí que me lo iba a dar por correcto aunque estuviera inclinado."
-T1,2,C,1,S,16,"Se repite la pauta con el tres de antes"
-T1,2,B,2,S,58,"He dudado si me lo daría por correcto si la cerilla que he movido quedase tan pegada a la V contigua"
-T1,2,A,3,S,142,"Me ha costado un poco más"
-T1,2,D,4,S,48,"Son entretenidos estos retos"
+P04,1,D,1,S,21,Lo intenté en el móvil； y me salió mal； pues me costaba que las cerillas respondieran. Entonces abandoné. Hoy lo retomo en el ordenador.
+P04,1,C,2,S,35,Tres igual a tres igual a tres.
+P04,1,B,3,S,35,Estas problemas de lógica con cálculo mental no se me dan mal
+P04,1,A,4,S,205,Este en el primer intento en el móvil； creí que me lo iba a dar por correcto aunque estuviera inclinado.
+P04,2,C,1,S,16,Se repite la pauta con el tres de antes
+P04,2,B,2,S,58,He dudado si me lo daría por correcto si la cerilla que he movido quedase tan pegada a la V contigua
+P04,2,A,3,S,142,Me ha costado un poco más
+P04,2,D,4,S,48,Son entretenidos estos retos

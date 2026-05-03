@@ -1,9 +1,9 @@
 Participante,Bloque,Tipo_Problema,Orden_Presentacion,Resuelto,Tiempo_Segundos,Observaciones
-Trenzas55,1,A,1,N,24,"mal estrucutrado"
-Trenzas55,1,C,2,N,102,"inocrrecto"
-Trenzas55,1,D,3,N,184,"7 y 3 =10"
-Trenzas55,1,B,4,N,48,"error"
-Trenzas55,2,D,1,S,58,"oles ahí"
-Trenzas55,2,A,2,S,32,"ea"
-Trenzas55,2,B,3,S,12,"iuoi"
-Trenzas55,2,C,4,N,251,"incorrecto"
+P07,1,A,1,N,24,mal estrucutrado
+P07,1,C,2,N,102,inocrrecto
+P07,1,D,3,N,184,7 y 3 =10
+P07,1,B,4,N,48,error
+P07,2,D,1,S,58,oles ahí
+P07,2,A,2,S,32,ea
+P07,2,B,3,S,12,iuoi
+P07,2,C,4,N,251,incorrecto

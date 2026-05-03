@@ -1,9 +1,9 @@
 Participante,Bloque,Tipo_Problema,Orden_Presentacion,Resuelto,Tiempo_Segundos,Observaciones
-sosio7020,1,D,1,S,129,""
-sosio7020,1,B,2,N,109,""
-sosio7020,1,A,3,S,20,""
-sosio7020,1,C,4,N,284,""
-sosio7020,2,B,1,N,140,""
-sosio7020,2,D,2,S,78,""
-sosio7020,2,A,3,S,13,""
-sosio7020,2,C,4,N,300,""
+P01,1,D,1,S,129,
+P01,1,B,2,N,109,
+P01,1,A,3,S,20,
+P01,1,C,4,N,284,
+P01,2,B,1,N,140,
+P01,2,D,2,S,78,
+P01,2,A,3,S,13,
+P01,2,C,4,N,300,

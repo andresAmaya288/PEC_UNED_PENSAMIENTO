@@ -1,9 +1,9 @@
 Participante,Bloque,Tipo_Problema,Orden_Presentacion,Resuelto,Tiempo_Segundos,Observaciones
-Tumamá2,1,C,1,S,66,""
-Tumamá2,1,A,2,S,107,""
-Tumamá2,1,D,3,S,99,""
-Tumamá2,1,B,4,N,300,"No he encontrado la solución"
-Tumamá2,2,C,1,S,16,""
-Tumamá2,2,D,2,S,90,""
-Tumamá2,2,B,3,N,92,""
-Tumamá2,2,A,4,S,41,""
+P08,1,C,1,S,66,
+P08,1,A,2,S,107,
+P08,1,D,3,S,99,
+P08,1,B,4,N,300,No he encontrado la solución
+P08,2,C,1,S,16,
+P08,2,D,2,S,90,
+P08,2,B,3,N,92,
+P08,2,A,4,S,41,
