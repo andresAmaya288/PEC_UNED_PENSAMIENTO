@@ -30,3 +30,16 @@ temp_output.txt
 # Old documentation files (unified into README.md)
 ANALISIS_README.md
 RELLENAR_EXCEL_README.md
+
+# LaTeX (build artifacts)
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
