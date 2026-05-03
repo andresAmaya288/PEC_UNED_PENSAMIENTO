@@ -143,10 +143,10 @@ def graficar_frecuencia_acumulada(datos_por_bloque, carpeta_salida):
     }
     
     colores = {
-        'A': 'black',
-        'B': 'black',
-        'C': 'black',
-        'D': 'black'
+        'A': '#e74c3c',  # Rojo
+        'B': '#3498db',  # Azul
+        'C': '#2ecc71',  # Verde
+        'D': '#f39c12'   # Naranja
     }
     
     for bloque in sorted(datos_por_bloque.keys()):
@@ -165,19 +165,23 @@ def graficar_frecuencia_acumulada(datos_por_bloque, carpeta_salida):
             frecuencia = freq_acum[tipo]['frecuencia']
             
             ax.plot(tiempo, frecuencia, marcador, label=etiqueta, 
-                   color=color, markersize=8, linewidth=2)
+                   color=color, markersize=10, linewidth=2.5)
         
-        ax.set_xlabel('Time (min)', fontsize=12)
-        ax.set_ylabel('Cumulative Frequency of Solutions', fontsize=12)
+        ax.set_xlabel('Time (min)', fontsize=12, fontweight='bold')
+        ax.set_ylabel('Cumulative Frequency of Solutions', fontsize=12, fontweight='bold')
         ax.set_xlim(0, 5)
         ax.set_ylim(0, max(20, y_max + 2))
-        ax.grid(True, alpha=0.3)
-        ax.legend(loc='lower right', fontsize=10)
+        ax.grid(True, alpha=0.3, linestyle='--')
+        ax.legend(loc='lower right', fontsize=11, framealpha=0.95)
         
         # Título descriptivo
         num_participantes = len(datos_bloque['A']['tiempos'])
         titulo = f'Cumulative solution rates for Problem Types A-D in Block {bloque}\n(n={num_participantes} participants)'
-        ax.set_title(titulo, fontsize=12, pad=20)
+        ax.set_title(titulo, fontsize=12, fontweight='bold', pad=20)
+        
+        # Mejorar estilo
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
         
         archivo_salida = os.path.join(carpeta_salida, f'fig_bloque_{bloque}_frecuencia.png')
         plt.tight_layout()
@@ -194,6 +198,13 @@ def graficar_tiempo_promedio(datos_por_bloque, carpeta_salida):
         datos_por_bloque (dict): Datos procesados por bloque
         carpeta_salida (str): Carpeta donde guardar los gráficos
     """
+    colores_tipos = {
+        'A': '#e74c3c',  # Rojo
+        'B': '#3498db',  # Azul
+        'C': '#2ecc71',  # Verde
+        'D': '#f39c12'   # Naranja
+    }
+    
     for bloque in sorted(datos_por_bloque.keys()):
         datos_bloque = datos_por_bloque[bloque]
         
@@ -204,32 +215,39 @@ def graficar_tiempo_promedio(datos_por_bloque, carpeta_salida):
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
         
         # Gráfico 1: Tiempo promedio de resolución
-        colores_barras = ['lightblue' if r > 0 else 'lightcoral' for r in resueltos]
-        barras = ax1.bar(tipos, tiempos_promedio, color=colores_barras, edgecolor='black', linewidth=1.5)
-        ax1.set_ylabel('Mean Time (minutes)', fontsize=11)
-        ax1.set_xlabel('Problem Type', fontsize=11)
-        ax1.set_title(f'Block {bloque}: Mean Resolution Time', fontsize=12)
+        colores_barras = [colores_tipos[t] for t in tipos]
+        barras = ax1.bar(tipos, tiempos_promedio, color=colores_barras, 
+                        edgecolor='black', linewidth=2, alpha=0.8)
+        ax1.set_ylabel('Mean Time (minutes)', fontsize=11, fontweight='bold')
+        ax1.set_xlabel('Problem Type', fontsize=11, fontweight='bold')
+        ax1.set_title(f'Block {bloque}: Mean Resolution Time', fontsize=12, fontweight='bold')
         ax1.set_ylim(0, 5.5)
-        ax1.grid(True, axis='y', alpha=0.3)
+        ax1.grid(True, axis='y', alpha=0.3, linestyle='--')
+        ax1.spines['top'].set_visible(False)
+        ax1.spines['right'].set_visible(False)
         
         # Añadir valores en las barras
         for barra, tiempo in zip(barras, tiempos_promedio):
             altura = barra.get_height()
             ax1.text(barra.get_x() + barra.get_width()/2., altura,
-                    f'{tiempo:.1f}', ha='center', va='bottom', fontsize=10)
+                    f'{tiempo:.1f}', ha='center', va='bottom', fontsize=10, fontweight='bold')
         
         # Gráfico 2: Tasa de resolución
         tasa_resolucion = [r / datos_bloque[t]['total'] * 100 for t, r in zip(tipos, resueltos)]
-        ax2.bar(tipos, tasa_resolucion, color=colores_barras, edgecolor='black', linewidth=1.5)
-        ax2.set_ylabel('Solution Rate (%)', fontsize=11)
-        ax2.set_xlabel('Problem Type', fontsize=11)
-        ax2.set_title(f'Block {bloque}: Solution Rate', fontsize=12)
+        barras2 = ax2.bar(tipos, tasa_resolucion, color=colores_barras, 
+                         edgecolor='black', linewidth=2, alpha=0.8)
+        ax2.set_ylabel('Solution Rate (%)', fontsize=11, fontweight='bold')
+        ax2.set_xlabel('Problem Type', fontsize=11, fontweight='bold')
+        ax2.set_title(f'Block {bloque}: Solution Rate', fontsize=12, fontweight='bold')
         ax2.set_ylim(0, 110)
-        ax2.grid(True, axis='y', alpha=0.3)
+        ax2.grid(True, axis='y', alpha=0.3, linestyle='--')
+        ax2.spines['top'].set_visible(False)
+        ax2.spines['right'].set_visible(False)
         
         # Añadir valores en las barras
         for i, (tipo, tasa) in enumerate(zip(tipos, tasa_resolucion)):
-            ax2.text(i, tasa + 2, f'{tasa:.0f}%', ha='center', va='bottom', fontsize=10)
+            ax2.text(i, tasa + 2, f'{tasa:.0f}%', ha='center', va='bottom', 
+                    fontsize=10, fontweight='bold')
         
         archivo_salida = os.path.join(carpeta_salida, f'fig_bloque_{bloque}_tiempo_y_tasa.png')
         plt.tight_layout()
