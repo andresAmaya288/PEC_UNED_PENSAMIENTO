@@ -91,7 +91,8 @@ def procesar_datos_por_bloque(df):
                 'resueltos': (df_tipo['Resuelto'] == 'S').sum(),
                 'total': len(df_tipo),
                 'tiempo_promedio': tiempos_min.mean(),
-                'tiempos': tiempos_resueltos_min.values  # Solo tiempos RESUELTOS
+                'tiempos': tiempos_resueltos_min.values,  # Solo tiempos RESUELTOS
+                'num_participantes': len(df_tipo)  # Total de participantes para este tipo
             }
         
         datos_por_bloque[bloque] = datos_bloque
@@ -180,8 +181,8 @@ def graficar_frecuencia_acumulada(datos_por_bloque, carpeta_salida):
         ax.grid(True, alpha=0.3, linestyle='--')
         ax.legend(loc='lower right', fontsize=12, framealpha=0.95)
         
-        # Título descriptivo
-        num_participantes = len(datos_bloque['A']['tiempos'])
+        # Título descriptivo - usar el número total de participantes
+        num_participantes = datos_bloque['A']['num_participantes']
         titulo = f'Cumulative solution rates for Problem Types A-D in Block {bloque}\n(n={num_participantes} participants)'
         ax.set_title(titulo, fontsize=12, fontweight='bold', pad=20)
         
