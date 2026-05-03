@@ -32,7 +32,7 @@ def cargar_csv_experimento(ruta_carpeta):
     Returns:
         pd.DataFrame: DataFrame concatenado con todos los datos
     """
-    archivos_csv = glob.glob(os.path.join(ruta_carpeta, 'knoblich_*.csv'))
+    archivos_csv = glob.glob(os.path.join(ruta_carpeta, '*.csv'))
     
     if not archivos_csv:
         print(f"❌ No se encontraron archivos CSV en '{ruta_carpeta}'")
@@ -45,10 +45,9 @@ def cargar_csv_experimento(ruta_carpeta):
         df = pd.read_csv(archivo)
         
         # Extraer código de participante del nombre del archivo
-        # Formato esperado: knoblich_P01_1234567890.csv
+        # Formato esperado: P01.csv, P02.csv, etc.
         nombre_archivo = os.path.basename(archivo)
-        partes = nombre_archivo.replace('knoblich_', '').replace('.csv', '').split('_')
-        codigo_participante = partes[0] if len(partes) > 0 else 'DESCONOCIDO'
+        codigo_participante = nombre_archivo.replace('.csv', '').strip()
         
         # Reemplazar el código de participante en el CSV con el del archivo
         df['Participante'] = codigo_participante

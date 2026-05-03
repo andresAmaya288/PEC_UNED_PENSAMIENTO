@@ -55,8 +55,9 @@ python analisis_resultados.py ./datos_csv --output ./mis_graficos
 proyecto/
 ├─ analisis_resultados.py
 ├─ datos_csv/
-│  ├─ knoblich_P01_1234567890.csv
-│  ├─ knoblich_P02_1234567891.csv
+│   ├── P01.csv
+│   ├── P02.csv
+│   ├── P03.csv
 │  └─ ...
 └─ gráficos/  (creada automáticamente)
    ├─ fig_bloque_1_frecuencia.png
@@ -68,11 +69,16 @@ proyecto/
 
 ## Archivos CSV esperados
 
-Los archivos CSV deben ser los descargados directamente desde la aplicación con nombre `knoblich_P01_*.csv`, `knoblich_P02_*.csv`, etc.
+Los archivos CSV deben **renombrarse simplemente como P01.csv, P02.csv, P03.csv**, etc.
 
-**El código de participante se extrae automáticamente del nombre del archivo** (P01, P02, P03, etc.), reemplazando cualquier código diferente que haya dentro del CSV.
+**El código de participante se extrae automáticamente del nombre del archivo** (P01, P02, etc.), reemplazando cualquier código diferente que haya dentro del CSV.
 
-Estructura esperada del CSV:
+Pasos:
+1. Descargar el CSV desde la aplicación (tendrá nombre `knoblich_P01_1234567890.csv`)
+2. Renombrar a `P01.csv` (o `P02.csv`, `P03.csv`, etc.)
+3. Poner todos en la carpeta de datos
+
+Estructura esperada del CSV (columnas):
 ```
 Participante, Bloque, Tipo_Problema, Orden_Presentacion, Resuelto, Tiempo_Segundos, Observaciones
 ```
@@ -119,9 +125,9 @@ ANÁLISIS DE RESULTADOS - EXPERIMENTO DE CERILLAS
 
 📊 Cargando archivos CSV...
 📁 Encontrados 3 archivo(s) CSV
-   ✓ knoblich_P01_1234567890.csv → P01 (8 registros)
-   ✓ knoblich_P02_1234567891.csv → P02 (8 registros)
-   ✓ knoblich_P03_1234567892.csv → P03 (8 registros)
+   ✓ P01.csv → P01 (8 registros)
+   ✓ P02.csv → P02 (8 registros)
+   ✓ P03.csv → P03 (8 registros)
 
 ✓ Total de registros: 24
 ✓ Participantes únicos: 3
@@ -154,8 +160,9 @@ ANÁLISIS DE RESULTADOS - EXPERIMENTO DE CERILLAS
 1. **Múltiples participantes:** El script automáticamente agrega los datos de todos los participantes en la carpeta CSV.
 
 2. **Código de participante:** Se extrae del **nombre del archivo** (P01, P02, etc.), reemplazando cualquier código diferente que esté en el CSV.
-   - Archivo: `knoblich_P01_1234567890.csv` → Participante: P01
-   - Archivo: `knoblich_P02_1234567891.csv` → Participante: P02
+   - Archivo: `P01.csv` → Participante: P01
+   - Archivo: `P02.csv` → Participante: P02
+   - No importa el código que haya en el CSV, se reemplaza con el del nombre del archivo
 
 3. **Sin análisis inferenciales:** Los gráficos son puramente descriptivos. No incluyen pruebas estadísticas (ANOVA, etc.), ya que el objetivo es interpretar el patrón general de los datos.
 
@@ -176,9 +183,9 @@ Si necesitas modificar colores, fuentes, tamaños o estilos, puedes editar las s
 ## Solución de problemas
 
 ### "No se encontraron archivos CSV"
-- Verifica que los archivos tengan el formato `knoblich_*.csv`
+- Verifica que los archivos se llamen `P01.csv`, `P02.csv`, etc.
 - Asegúrate de que están en la carpeta correcta
-- Los archivos deben descargarse directamente desde la aplicación web
+- Los archivos deben descargarse desde la aplicación y renombrarse a P01.csv, P02.csv, etc.
 
 ### Errores de columnas
 - Comprueba que el CSV tiene las columnas exactas (case-sensitive):
