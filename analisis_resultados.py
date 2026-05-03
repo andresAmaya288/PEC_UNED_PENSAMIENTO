@@ -130,17 +130,16 @@ def graficar_frecuencia_acumulada(datos_por_bloque, carpeta_salida):
     """
     Genera gráficos de frecuencia acumulada de soluciones por bloque.
     Similar a Figuras 2 y 4 de Knoblich et al. (1999).
-    Usa dos subgráficos para separar tipos fáciles (A+D) de difíciles (B+C).
     
     Args:
         datos_por_bloque (dict): Datos procesados por bloque
         carpeta_salida (str): Carpeta donde guardar los gráficos
     """
     estilos_linea = {
-        'A': ('-', 's'),     # línea sólida + cuadrado
-        'B': ('--', 'o'),    # línea dashed + círculo
-        'C': (':', '^'),     # línea dotted + triángulo
-        'D': ('-.', 'D')     # línea dashdot + diamante
+        'A': ('-', 's', 'Type A'),      # línea sólida + cuadrado
+        'B': ('--', 'o', 'Type B'),     # línea dashed + círculo
+        'C': (':', '^', 'Type C'),      # línea dotted + triángulo
+        'D': ('-.', 'D', 'Type D')      # línea dashdot + diamante
     }
     
     colores = {
@@ -154,55 +153,36 @@ def graficar_frecuencia_acumulada(datos_por_bloque, carpeta_salida):
         datos_bloque = datos_por_bloque[bloque]
         freq_acum = calcular_frecuencia_acumulada(datos_bloque)
         
-        # Crear figura con 2 subgráficos
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
+        fig, ax = plt.subplots(figsize=(12, 7))
         
-        # Subgráfico 1: Tipos A y D (alta dificultad / baja dificultad)
-        for tipo in ['A', 'D']:
-            estilo_linea, marcador = estilos_linea[tipo]
+        # Determinar y máximo basado en los datos
+        y_max = max([max(f['frecuencia']) for f in freq_acum.values()])
+        
+        for tipo in sorted(freq_acum.keys()):
+            estilo_linea, marcador, etiqueta = estilos_linea[tipo]
             color = colores[tipo]
             tiempo = freq_acum[tipo]['tiempo']
             frecuencia = freq_acum[tipo]['frecuencia']
             
-            ax1.plot(tiempo, frecuencia, linestyle=estilo_linea, marker=marcador,
-                    label=f'Type {tipo}', color=color, markersize=12, linewidth=3, 
-                    markeredgewidth=1.5, markeredgecolor='black')
+            ax.plot(tiempo, frecuencia, linestyle=estilo_linea, marker=marcador,
+                   label=etiqueta, color=color, markersize=11, linewidth=3,
+                   markeredgewidth=1.5, markeredgecolor='black')
         
-        ax1.set_xlabel('Time (min)', fontsize=12, fontweight='bold')
-        ax1.set_ylabel('Cumulative Frequency', fontsize=12, fontweight='bold')
-        ax1.set_xlim(0, 5)
-        ax1.set_ylim(0, 10)
-        ax1.grid(True, alpha=0.3, linestyle='--')
-        ax1.legend(loc='lower right', fontsize=12, framealpha=0.95)
-        ax1.set_title(f'Block {bloque}: Type A vs Type D', fontsize=12, fontweight='bold')
-        ax1.spines['top'].set_visible(False)
-        ax1.spines['right'].set_visible(False)
+        ax.set_xlabel('Time (min)', fontsize=12, fontweight='bold')
+        ax.set_ylabel('Cumulative Frequency of Solutions', fontsize=12, fontweight='bold')
+        ax.set_xlim(0, 5)
+        ax.set_ylim(0, max(10, y_max + 1))
+        ax.grid(True, alpha=0.3, linestyle='--')
+        ax.legend(loc='lower right', fontsize=12, framealpha=0.95)
         
-        # Subgráfico 2: Tipos B y C (difíciles)
-        for tipo in ['B', 'C']:
-            estilo_linea, marcador = estilos_linea[tipo]
-            color = colores[tipo]
-            tiempo = freq_acum[tipo]['tiempo']
-            frecuencia = freq_acum[tipo]['frecuencia']
-            
-            ax2.plot(tiempo, frecuencia, linestyle=estilo_linea, marker=marcador,
-                    label=f'Type {tipo}', color=color, markersize=12, linewidth=3,
-                    markeredgewidth=1.5, markeredgecolor='black')
-        
-        ax2.set_xlabel('Time (min)', fontsize=12, fontweight='bold')
-        ax2.set_ylabel('Cumulative Frequency', fontsize=12, fontweight='bold')
-        ax2.set_xlim(0, 5)
-        ax2.set_ylim(0, 10)
-        ax2.grid(True, alpha=0.3, linestyle='--')
-        ax2.legend(loc='lower right', fontsize=12, framealpha=0.95)
-        ax2.set_title(f'Block {bloque}: Type B vs Type C', fontsize=12, fontweight='bold')
-        ax2.spines['top'].set_visible(False)
-        ax2.spines['right'].set_visible(False)
-        
-        # Título general
+        # Título descriptivo
         num_participantes = len(datos_bloque['A']['tiempos'])
-        fig.suptitle(f'Cumulative solution rates for Block {bloque} (n={num_participantes} participants)', 
-                     fontsize=14, fontweight='bold', y=1.00)
+        titulo = f'Cumulative solution rates for Problem Types A-D in Block {bloque}\n(n={num_participantes} participants)'
+        ax.set_title(titulo, fontsize=12, fontweight='bold', pad=20)
+        
+        # Mejorar estilo
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
         
         archivo_salida = os.path.join(carpeta_salida, f'fig_bloque_{bloque}_frecuencia.png')
         plt.tight_layout()
