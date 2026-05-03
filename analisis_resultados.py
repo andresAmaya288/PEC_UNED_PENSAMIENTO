@@ -62,6 +62,7 @@ def cargar_csv_experimento(ruta_carpeta):
 def procesar_datos_por_bloque(df):
     """
     Procesa los datos y los agrupa por bloque y tipo de problema.
+    Solo cuenta los problemas RESUELTOS para la frecuencia acumulada.
     
     Args:
         df (pd.DataFrame): DataFrame con los resultados
@@ -82,11 +83,15 @@ def procesar_datos_por_bloque(df):
             # Convertir tiempo a minutos
             tiempos_min = df_tipo['Tiempo_Segundos'] / 60.0
             
+            # IMPORTANTE: Solo contar tiempos de RESUELTOS para frecuencia acumulada
+            df_resueltos = df_tipo[df_tipo['Resuelto'] == 'S']
+            tiempos_resueltos_min = df_resueltos['Tiempo_Segundos'] / 60.0
+            
             datos_bloque[tipo] = {
                 'resueltos': (df_tipo['Resuelto'] == 'S').sum(),
                 'total': len(df_tipo),
                 'tiempo_promedio': tiempos_min.mean(),
-                'tiempos': tiempos_min.values
+                'tiempos': tiempos_resueltos_min.values  # Solo tiempos RESUELTOS
             }
         
         datos_por_bloque[bloque] = datos_bloque
