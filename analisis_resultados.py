@@ -23,7 +23,8 @@ from collections import defaultdict
 
 def cargar_csv_experimento(ruta_carpeta):
     """
-    Carga todos los archivos CSV de una carpeta.
+    Carga todos los archivos CSV de una carpeta y extrae el código de participante
+    del nombre del archivo (P01, P02, etc).
     
     Args:
         ruta_carpeta (str): Ruta a la carpeta con archivos CSV
@@ -42,8 +43,18 @@ def cargar_csv_experimento(ruta_carpeta):
     dfs = []
     for archivo in archivos_csv:
         df = pd.read_csv(archivo)
+        
+        # Extraer código de participante del nombre del archivo
+        # Formato esperado: knoblich_P01_1234567890.csv
+        nombre_archivo = os.path.basename(archivo)
+        partes = nombre_archivo.replace('knoblich_', '').replace('.csv', '').split('_')
+        codigo_participante = partes[0] if len(partes) > 0 else 'DESCONOCIDO'
+        
+        # Reemplazar el código de participante en el CSV con el del archivo
+        df['Participante'] = codigo_participante
+        
         dfs.append(df)
-        print(f"   ✓ {os.path.basename(archivo)} ({len(df)} registros)")
+        print(f"   ✓ {nombre_archivo} → {codigo_participante} ({len(df)} registros)")
     
     df_total = pd.concat(dfs, ignore_index=True)
     return df_total
@@ -265,7 +276,7 @@ def main():
     carpeta_csv = sys.argv[1]
     
     # Procesar argumentos opcionales
-    carpeta_salida = './graficos_experimento'
+    carpeta_salida = './gráficos'
     if '--output' in sys.argv:
         idx = sys.argv.index('--output')
         if idx + 1 < len(sys.argv):

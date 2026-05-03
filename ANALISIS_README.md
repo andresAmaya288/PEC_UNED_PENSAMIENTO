@@ -25,6 +25,8 @@ pip install -r requirements.txt
 
 ### Forma básica
 
+Por defecto, guarda los gráficos en una carpeta llamada `gráficos/`:
+
 ```bash
 python analisis_resultados.py <carpeta_con_csvs>
 ```
@@ -33,6 +35,8 @@ python analisis_resultados.py <carpeta_con_csvs>
 ```bash
 python analisis_resultados.py ./datos_csv
 ```
+
+Esto creará automáticamente `./gráficos/` con todos los resultados.
 
 ### Especificar carpeta de salida personalizada
 
@@ -49,23 +53,26 @@ python analisis_resultados.py ./datos_csv --output ./mis_graficos
 
 ```
 proyecto/
-├── analisis_resultados.py
-├── datos_csv/
-│   ├── knoblich_P01_1234567890.csv
-│   ├── knoblich_P02_1234567891.csv
-│   └── ...
-└── graficos_experimento/  (creada automáticamente)
-    ├── fig_bloque_1_frecuencia.png
-    ├── fig_bloque_2_frecuencia.png
-    ├── fig_bloque_1_tiempo_y_tasa.png
-    ├── fig_bloque_2_tiempo_y_tasa.png
-    └── tabla_resumen.csv
+├─ analisis_resultados.py
+├─ datos_csv/
+│  ├─ knoblich_P01_1234567890.csv
+│  ├─ knoblich_P02_1234567891.csv
+│  └─ ...
+└─ gráficos/  (creada automáticamente)
+   ├─ fig_bloque_1_frecuencia.png
+   ├─ fig_bloque_2_frecuencia.png
+   ├─ fig_bloque_1_tiempo_y_tasa.png
+   ├─ fig_bloque_2_tiempo_y_tasa.png
+   └─ tabla_resumen.csv
 ```
 
 ## Archivos CSV esperados
 
-Los archivos CSV deben ser los descargados directamente desde la aplicación (con nombre `knoblich_*.csv`) y contener las columnas:
+Los archivos CSV deben ser los descargados directamente desde la aplicación con nombre `knoblich_P01_*.csv`, `knoblich_P02_*.csv`, etc.
 
+**El código de participante se extrae automáticamente del nombre del archivo** (P01, P02, P03, etc.), reemplazando cualquier código diferente que haya dentro del CSV.
+
+Estructura esperada del CSV:
 ```
 Participante, Bloque, Tipo_Problema, Orden_Presentacion, Resuelto, Tiempo_Segundos, Observaciones
 ```
@@ -112,9 +119,9 @@ ANÁLISIS DE RESULTADOS - EXPERIMENTO DE CERILLAS
 
 📊 Cargando archivos CSV...
 📁 Encontrados 3 archivo(s) CSV
-   ✓ knoblich_P01_1234567890.csv (8 registros)
-   ✓ knoblich_P02_1234567891.csv (8 registros)
-   ✓ knoblich_P03_1234567892.csv (8 registros)
+   ✓ knoblich_P01_1234567890.csv → P01 (8 registros)
+   ✓ knoblich_P02_1234567891.csv → P02 (8 registros)
+   ✓ knoblich_P03_1234567892.csv → P03 (8 registros)
 
 ✓ Total de registros: 24
 ✓ Participantes únicos: 3
@@ -128,17 +135,17 @@ ANÁLISIS DE RESULTADOS - EXPERIMENTO DE CERILLAS
       1    B         2     3     66.7               2.15           1.20
       ...
 
-✓ Tabla guardada en: ./graficos_experimento/tabla_resumen.csv
+✓ Tabla guardada en: ./gráficos/tabla_resumen.csv
 
 📈 Generando gráficos...
-✓ Gráfico guardado: ./graficos_experimento/fig_bloque_1_frecuencia.png
-✓ Gráfico guardado: ./graficos_experimento/fig_bloque_2_frecuencia.png
-✓ Gráfico guardado: ./graficos_experimento/fig_bloque_1_tiempo_y_tasa.png
-✓ Gráfico guardado: ./graficos_experimento/fig_bloque_2_tiempo_y_tasa.png
+✓ Gráfico guardado: ./gráficos/fig_bloque_1_frecuencia.png
+✓ Gráfico guardado: ./gráficos/fig_bloque_2_frecuencia.png
+✓ Gráfico guardado: ./gráficos/fig_bloque_1_tiempo_y_tasa.png
+✓ Gráfico guardado: ./gráficos/fig_bloque_2_tiempo_y_tasa.png
 
 ============================================================
 ✅ ANÁLISIS COMPLETADO
-📁 Gráficos guardados en: ./graficos_experimento
+📁 Gráficos guardados en: ./gráficos
 ============================================================
 ```
 
@@ -146,13 +153,17 @@ ANÁLISIS DE RESULTADOS - EXPERIMENTO DE CERILLAS
 
 1. **Múltiples participantes:** El script automáticamente agrega los datos de todos los participantes en la carpeta CSV.
 
-2. **Sin análisis inferenciales:** Los gráficos son puramente descriptivos. No incluyen pruebas estadísticas (ANOVA, etc.), ya que el objetivo es interpretar el patrón general de los datos.
+2. **Código de participante:** Se extrae del **nombre del archivo** (P01, P02, etc.), reemplazando cualquier código diferente que esté en el CSV.
+   - Archivo: `knoblich_P01_1234567890.csv` → Participante: P01
+   - Archivo: `knoblich_P02_1234567891.csv` → Participante: P02
 
-3. **Frecuencia acumulada:** Los valores muestran cuántos problemas han sido resueltos acumulativamente hasta cada punto en el tiempo.
+3. **Sin análisis inferenciales:** Los gráficos son puramente descriptivos. No incluyen pruebas estadísticas (ANOVA, etc.), ya que el objetivo es interpretar el patrón general de los datos.
 
-4. **Tiempo máximo:** El gráfico de frecuencia muestra datos hasta 5 minutos (límite del experimento).
+4. **Frecuencia acumulada:** Los valores muestran cuántos problemas han sido resueltos acumulativamente hasta cada punto en el tiempo.
 
-5. **Resolución de imágenes:** Los gráficos se guardan a 300 DPI, adecuados para impresión y presentaciones.
+5. **Tiempo máximo:** El gráfico de frecuencia muestra datos hasta 5 minutos (límite del experimento).
+
+6. **Resolución de imágenes:** Los gráficos se guardan a 300 DPI, adecuados para impresión y presentaciones.
 
 ## Personalización
 
