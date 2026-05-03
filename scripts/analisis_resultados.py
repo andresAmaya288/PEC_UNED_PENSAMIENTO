@@ -293,14 +293,20 @@ def generar_tabla_resumen(datos_por_bloque):
 
 def main():
     """Función principal."""
-    if len(sys.argv) < 2:
-        print(__doc__)
-        sys.exit(1)
     
-    carpeta_csv = sys.argv[1]
+    # Construir rutas por defecto relativas a la ubicación del script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    default_carpeta_csv = os.path.join(script_dir, '..', 'data', 'Respuestas')
+    default_carpeta_salida = os.path.join(script_dir, '..', 'data', 'gráficos')
+    
+    # Usar argumento si se proporciona, si no usar por defecto
+    if len(sys.argv) < 2:
+        carpeta_csv = default_carpeta_csv
+    else:
+        carpeta_csv = sys.argv[1]
     
     # Procesar argumentos opcionales
-    carpeta_salida = './gráficos'
+    carpeta_salida = default_carpeta_salida
     if '--output' in sys.argv:
         idx = sys.argv.index('--output')
         if idx + 1 < len(sys.argv):

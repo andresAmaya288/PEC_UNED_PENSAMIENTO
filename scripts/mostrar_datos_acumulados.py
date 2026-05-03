@@ -5,6 +5,7 @@ Muestra los tiempos individuales y la frecuencia acumulada para cada tipo y bloq
 """
 
 import os
+import sys
 import glob
 import pandas as pd
 import numpy as np
@@ -13,7 +14,12 @@ import numpy as np
 def main():
     """Carga datos y muestra estadísticas detalladas."""
     
-    carpeta = './Respuestas'
+    # Construir ruta por defecto relativa a la ubicación del script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    default_carpeta = os.path.join(script_dir, '..', 'data', 'Respuestas')
+    
+    # Usar argumento si se proporciona, si no usar por defecto
+    carpeta = sys.argv[1] if len(sys.argv) > 1 else default_carpeta
     archivos_csv = sorted(glob.glob(os.path.join(carpeta, '*.csv')))
     
     if not archivos_csv:

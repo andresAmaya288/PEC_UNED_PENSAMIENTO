@@ -17,7 +17,10 @@ import shutil
 def main():
     """Lee todos los CSV y reemplaza Participante con el código del archivo."""
     
-    carpeta = os.path.abspath('./Respuestas')
+    # Construir ruta relativa a data/Respuestas desde la ubicación del script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    carpeta = os.path.join(script_dir, '..', 'data', 'Respuestas')
+    carpeta = os.path.abspath(carpeta)
     archivos_csv = sorted(glob.glob(os.path.join(carpeta, '*.csv')))
     
     if not archivos_csv:

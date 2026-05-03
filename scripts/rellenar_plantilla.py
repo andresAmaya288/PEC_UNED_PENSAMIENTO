@@ -175,12 +175,16 @@ def generar_resumen_texto(datos_participantes):
 
 def main():
     """Función principal."""
-    if len(sys.argv) < 2:
-        print(__doc__)
-        sys.exit(1)
     
-    carpeta_csv = sys.argv[1]
-    archivo_plantilla = sys.argv[2] if len(sys.argv) > 2 else "plantilla en blanco_registro_experimento_insight(1).xlsx"
+    # Construir rutas por defecto relativas a la ubicación del script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    default_carpeta_csv = os.path.join(script_dir, '..', 'data', 'Respuestas')
+    default_archivo_plantilla = os.path.join(script_dir, '..', 'docs', 'plantilla en blanco_registro_experimento_insight(1).xlsx')
+    default_carpeta_salida = os.path.join(script_dir, '..', 'data', 'registro_excel')
+    
+    # Usar argumentos si se proporcionan, si no usar por defecto
+    carpeta_csv = sys.argv[1] if len(sys.argv) > 1 else default_carpeta_csv
+    archivo_plantilla = sys.argv[2] if len(sys.argv) > 2 else default_archivo_plantilla
     
     print("=" * 70)
     print("RELLENAR PLANTILLA EXCEL - EXPERIMENTO DE CERILLAS")
@@ -199,7 +203,7 @@ def main():
     
     # Rellenar plantilla
     print("\n📝 Rellenando plantilla Excel...")
-    rellenar_excel(datos_participantes, archivo_plantilla, carpeta_salida='./registro_excel')
+    rellenar_excel(datos_participantes, archivo_plantilla, carpeta_salida=default_carpeta_salida)
     
     print("\n✅ PROCESO COMPLETADO")
 
