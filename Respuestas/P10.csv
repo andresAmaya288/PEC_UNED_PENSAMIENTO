@@ -1,9 +1,9 @@
 Participante,Bloque,Tipo_Problema,Orden_Presentacion,Resuelto,Tiempo_Segundos,Observaciones
-Hermanapri,1,C,1,S,271,""
-Hermanapri,1,B,2,S,224,""
-Hermanapri,1,A,3,S,138,""
-Hermanapri,1,D,4,S,125,"He tenido que intentarlo mucho para ver que es posible todos los movimientos"
-Hermanapri,2,C,1,S,21,"Ahora es más fácil； sabiendo que se pueden mover en todas las posibilidades"
-Hermanapri,2,D,2,S,97,""
-Hermanapri,2,B,3,N,285,"No encuentro la solución y estoy nerviosa porque se me acaba el tiempo"
-Hermanapri,2,A,4,N,86,""
+P10,1,C,1,S,271,
+P10,1,B,2,S,224,
+P10,1,A,3,S,138,
+P10,1,D,4,S,125,He tenido que intentarlo mucho para ver que es posible todos los movimientos
+P10,2,C,1,S,21,Ahora es más fácil； sabiendo que se pueden mover en todas las posibilidades
+P10,2,D,2,S,97,
+P10,2,B,3,N,285,No encuentro la solución y estoy nerviosa porque se me acaba el tiempo
+P10,2,A,4,N,86,

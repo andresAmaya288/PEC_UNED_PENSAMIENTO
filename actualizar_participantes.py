@@ -10,12 +10,14 @@ Uso:
 import os
 import glob
 import pandas as pd
+import tempfile
+import shutil
 
 
 def main():
     """Lee todos los CSV y reemplaza Participante con el código del archivo."""
     
-    carpeta = './Respuestas'
+    carpeta = os.path.abspath('./Respuestas')
     archivos_csv = sorted(glob.glob(os.path.join(carpeta, '*.csv')))
     
     if not archivos_csv:
@@ -28,19 +30,28 @@ def main():
         nombre_archivo = os.path.basename(archivo)
         codigo = nombre_archivo.replace('.csv', '').strip()
         
-        # Leer CSV
-        df = pd.read_csv(archivo)
-        
-        # Obtener el valor anterior
-        valor_anterior = df['Participante'].iloc[0] if len(df) > 0 else "???"
-        
-        # Reemplazar Participante por el código del archivo
-        df['Participante'] = codigo
-        
-        # Guardar
-        df.to_csv(archivo, index=False)
-        
-        print(f"✓ {nombre_archivo}: {valor_anterior} → {codigo} ({len(df)} registros)")
+        try:
+            # Leer CSV
+            df = pd.read_csv(archivo)
+            
+            # Obtener el valor anterior
+            valor_anterior = df['Participante'].iloc[0] if len(df) > 0 else "???"
+            
+            # Reemplazar Participante por el código del archivo
+            df['Participante'] = codigo
+            
+            # Guardar a archivo temporal primero, luego mover (más seguro)
+            temp_fd, temp_path = tempfile.mkstemp(suffix='.csv', text=True)
+            os.close(temp_fd)
+            
+            df.to_csv(temp_path, index=False)
+            shutil.move(temp_path, archivo)
+            
+            print(f"✓ {nombre_archivo}: {valor_anterior} → {codigo} ({len(df)} registros)")
+        except PermissionError as e:
+            print(f"⚠️  {nombre_archivo}: Permiso denegado. ¿Está abierto en Excel? Error: {e}")
+        except Exception as e:
+            print(f"❌ {nombre_archivo}: Error - {e}")
     
     print(f"\n✅ Actualización completada: {len(archivos_csv)} archivo(s)")
 

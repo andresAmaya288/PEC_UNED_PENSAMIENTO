@@ -1,9 +1,9 @@
 Participante,Bloque,Tipo_Problema,Orden_Presentacion,Resuelto,Tiempo_Segundos,Observaciones
-Primo1,1,A,1,S,54,"Este fue sencillo"
-Primo1,1,D,2,S,63,"También fue sencillo"
-Primo1,1,C,3,N,54,"Falle； creí que podía poner la V con un palo recto y otro en diagonal； perdón 😧"
-Primo1,1,B,4,S,53,"Esta fue sencilla también"
-Primo1,2,A,1,S,32,"Como las anteriores"
-Primo1,2,C,2,S,280,"Está me costó más； porque mi primer impulso fue buscar cambiar los números y no las operaciones"
-Primo1,2,B,3,N,300,"La verdad que no encontré la solución； me quedé en blanco； se me ocurrieron varias cosas pero no eran válidas 🙈"
-Primo1,2,D,4,S,103,"Está también me resultó sencilla； fue de lo primero que pensé"
+P09,1,A,1,S,54,Este fue sencillo
+P09,1,D,2,S,63,También fue sencillo
+P09,1,C,3,N,54,Falle； creí que podía poner la V con un palo recto y otro en diagonal； perdón 😧
+P09,1,B,4,S,53,Esta fue sencilla también
+P09,2,A,1,S,32,Como las anteriores
+P09,2,C,2,S,280,Está me costó más； porque mi primer impulso fue buscar cambiar los números y no las operaciones
+P09,2,B,3,N,300,La verdad que no encontré la solución； me quedé en blanco； se me ocurrieron varias cosas pero no eran válidas 🙈
+P09,2,D,4,S,103,Está también me resultó sencilla； fue de lo primero que pensé
